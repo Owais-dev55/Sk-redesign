@@ -1,0 +1,40 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  image     String?
+ speciality String?
+
+  doctorAppointments  Appointment[] @relation("DoctorAppointments")
+  patientAppointments Appointment[] @relation("PatientAppointments")
+}
+
+model Appointment {
+  id         String   @id @default(uuid())
+  patientId  String
+  doctorId   String
+  date       DateTime
+  status     String   @default("upcoming")
+
+  patient    User     @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctor     User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+}

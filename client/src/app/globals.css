@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+.nav-links {
+    @apply text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors duration-200
+}
+
+.nav-link-mob {
+    @apply text-gray-700 hover:text-blue-600 block px-3 py-2 text-base font-medium transition-colors duration-200
+}
+
+
+body {
+  --sb-track-color: #867f7f;
+  --sb-thumb-color: #4A66E0;
+  --sb-size: 5px;
+}
+
+body::-webkit-scrollbar {
+  width: var(--sb-size)
+}
+
+body::-webkit-scrollbar-track {
+  background: var(--sb-track-color);
+  border-radius: 5px;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb-color);
+  border-radius: 5px;
+  
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  body {
+    scrollbar-color: var(--sb-thumb-color)
+                     var(--sb-track-color);
+  }
+}
