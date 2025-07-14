@@ -6,6 +6,7 @@ import Image from "next/image"
 import Filter from "./FilterDoctors" 
 import Appointment from "./BookAppointment" 
 import { useSearchParams } from "next/navigation"
+import { API_BASE_URL } from "@/constants/constants"
 interface Doctor {
   id: string
   name: string
@@ -19,7 +20,6 @@ const DoctorsClientPage = () => {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedSpecialty, setSelectedSpecialty] = useState("all")
-
   const [showBookingModal, setShowBookingModal] = useState(false)
   const [selectedDoctorIdForModal, setSelectedDoctorIdForModal] = useState<string | null>(null)
 
@@ -27,7 +27,7 @@ const DoctorsClientPage = () => {
     const fetchDoctors = async () => {
       try {
         setLoading(true)
-        const res = await fetch("http://localhost:3000/api/doctors")
+        const res = await fetch(`${API_BASE_URL}/api/doctors`)
         const data = await res.json()
         if (!res.ok) {
           toast.error(data.message || "Failed to load doctors")
@@ -40,8 +40,8 @@ const DoctorsClientPage = () => {
         setSelectedSpecialty(urlSpecality)
       }
 
-      } catch (error) {
-        toast.error("Something went wrong while fetching doctors." + error)
+      } catch  {
+        toast.error("Something went wrong while fetching doctors." )
       } finally {
         setLoading(false)
       }

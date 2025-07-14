@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { FaTimes, FaSpinner, } from "react-icons/fa";
+import { API_BASE_URL } from "@/constants/constants";
 
 interface RescheduleModalProps {
   appointmentId: string;
@@ -34,7 +35,7 @@ export default function RescheduleModal({
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:3000/api/appointments/reschedule/${appointmentId}`,
+        `${API_BASE_URL}/api/appointments/reschedule/${appointmentId}`,
         {
           method: "PATCH",
           headers: {

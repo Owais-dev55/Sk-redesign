@@ -5,6 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "@/constants/constants";
 
 interface Doctor {
   id: string;
@@ -23,7 +24,7 @@ export default function BookAppointmentPage() {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/doctors");
+        const res = await fetch(`${API_BASE_URL}/api/doctors`);
         const data = await res.json();
         if (!res.ok) {
           toast.error(data.message || "Failed to load doctors");
@@ -47,7 +48,7 @@ export default function BookAppointmentPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/appointments/book", {
+      const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

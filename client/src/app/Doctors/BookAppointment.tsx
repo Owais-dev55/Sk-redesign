@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { FaTimes, FaSpinner } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/constants/constants";
 
 export default function BookAppointmentModal({
   onClose,
@@ -34,7 +35,7 @@ export default function BookAppointmentModal({
 
     try {
       setLoading(true);
-      const res = await fetch("http://localhost:3000/api/appointments/book", {
+      const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,7 +56,7 @@ export default function BookAppointmentModal({
 
       toast.success("Appointment booked successfully");
       router.push("/dashboard/appointments");
-      onClose(); // Call parent's onClose to close the modal
+      onClose(); 
     } catch (err) {
       toast.error("Something went wrong");
       console.error(err);

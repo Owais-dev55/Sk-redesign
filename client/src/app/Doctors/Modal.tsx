@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation" 
 import { toast } from "react-toastify"
 import { useCallback } from "react"
+import { API_BASE_URL } from "@/constants/constants"
 
 interface User {
   name: string
@@ -76,7 +77,7 @@ const checkAuth = useCallback(() => {
       }
 
       try {
-        const res = await fetch("http://localhost:3000/api/auth/doctors") 
+        const res = await fetch(`${API_BASE_URL}/api/auth/doctors`) 
         const data = await res.json()
         if (!res.ok) {
           toast.error(data.message || "Failed to load doctors.")
@@ -114,7 +115,7 @@ const checkAuth = useCallback(() => {
         return
       }
 
-      const res = await fetch("http://localhost:3000/api/appointments/book", {
+      const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

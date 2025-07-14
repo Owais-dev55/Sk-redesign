@@ -6,6 +6,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { useDispatch } from "react-redux";
 import ChangePassword from "../../../app/(patient)/components/ChangePassword";
 import Image from "next/image";
+import { API_BASE_URL } from "@/constants/constants";
 
 interface Specality {
   id: number;
@@ -38,7 +39,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/profile", {
+        const res = await fetch(`${API_BASE_URL}/api/profile`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         const data = await res.json();
@@ -52,8 +53,8 @@ export default function ProfilePage() {
         } else {
           toast.error(data.message || "Failed to load profile");
         }
-      } catch (err) {
-        toast.error("Error fetching profile" + err);
+      } catch  {
+        toast.error("Error fetching profile" );
       } finally {
         setLoading(false);
       }
@@ -63,7 +64,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchSpecality = async () => {
-      const res = await fetch('http://localhost:3000/api/specality')
+      const res = await fetch(`${API_BASE_URL}/specality`)
       const data = await res.json()
       if (!res.ok) {
         toast.error(data.message || "Failed to load fetch specality");
@@ -78,7 +79,7 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     try {
       setUpdating(true);
-      const res = await fetch("http://localhost:3000/api/profile", {
+      const res = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -113,7 +114,7 @@ export default function ProfilePage() {
     const formData = new FormData();
     formData.append("image", imageFile);
     try {
-      const res = await fetch("http://localhost:3000/api/profile/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/profile/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -136,8 +137,8 @@ export default function ProfilePage() {
       dispatch(setUser(updatedUser));
       toast.success("Profile picture updated");
       setPreviewUrl(null);
-    } catch (err) {
-      console.error("Upload error", err);
+    } catch  {
+      console.error("Upload error", );
       toast.error("Upload error");
     } finally {
       setUploading(false);

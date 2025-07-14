@@ -9,6 +9,7 @@ import {
 import { toast } from "react-toastify";
 import RescheduleModal from "./ResheduleModal";
 import { useState } from "react";
+import { API_BASE_URL } from "@/constants/constants";
 
 interface Appointment {
   id: string;
@@ -58,9 +59,7 @@ export default function AppointmentList({
   appointments: Appointment[];
   refetch: () => void;
 }) {
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
-    string | null
-  >(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const openModal = (id: string) => {
     setSelectedAppointmentId(id);
@@ -74,7 +73,7 @@ export default function AppointmentList({
   const handleCancel = async (id: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/api/appointments/doctor/${id}`,
+        `${API_BASE_URL}/api/appointments/doctor/${id}`,
         {
           method: "PATCH",
           headers: {
@@ -101,7 +100,7 @@ export default function AppointmentList({
   const handleApprove = async (id: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/api/appointments/doctor/${id}`,
+        `${API_BASE_URL}/api/appointments/doctor/${id}`,
         {
           method: "PATCH",
           headers: {

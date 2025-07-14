@@ -10,6 +10,7 @@ import {
 import { toast } from "react-toastify";
 import RescheduleModal from "../components/RescheduleModal";
 import { useState } from "react";
+import { API_BASE_URL } from "@/constants/constants";
 
 interface Appointment {
   id: string;
@@ -59,9 +60,7 @@ export default function AppointmentList({
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
-    string | null
-  >(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const openModal = (id: string) => {
     setSelectedAppointmentId(id);
@@ -74,7 +73,7 @@ export default function AppointmentList({
   const handleCancel = async (id: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/api/appointments/cancel/${id}`,
+        `${API_BASE_URL}/api/appointments/cancel/${id}`,
         {
           method: "PATCH",
           headers: {
@@ -93,6 +92,7 @@ export default function AppointmentList({
       toast.error("Something went wrong" + error);
     }
   };
+  
   return (
     <div className="space-y-3 sm:space-y-4">
       {appointments.map((appointment) => {

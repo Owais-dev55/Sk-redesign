@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { FaSpinner } from "react-icons/fa"
 import AppointmentList from  "../components/AppointmentList" 
 import AppointmentStats from "../components/AppointmentStats"
+import { API_BASE_URL } from "@/constants/constants"
 
 interface Appointment {
   id: string
@@ -29,7 +30,7 @@ export default function AppointmentsPage() {
   const fetchAppointments = async () => {
     try {
       const token = localStorage.getItem("token")
-      const res = await fetch(`http://localhost:3000/api/appointments/doctor`, {
+      const res = await fetch(`${API_BASE_URL}/api/appointments/doctor`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

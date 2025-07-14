@@ -1,24 +1,25 @@
-"use client"
-import { useState } from "react"
-import { FaLock, FaSpinner, FaShieldAlt } from "react-icons/fa"
-import { toast } from "react-toastify"
+"use client";
+import { API_BASE_URL } from "@/constants/constants";
+import { useState } from "react";
+import { FaLock, FaSpinner, FaShieldAlt } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const ChangePassword = () => {
-  const [changingPassword, setChangingPassword] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
-  })
+  });
 
   const handlePasswordChange = async () => {
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("Passwords do not match")
-      return
+      toast.error("Passwords do not match");
+      return;
     }
     try {
-      setChangingPassword(true)
-      const res = await fetch("http://localhost:3000/api/change-password", {
+      setChangingPassword(true);
+      const res = await fetch(`${API_BASE_URL}/api/change-password`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -28,24 +29,24 @@ const ChangePassword = () => {
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
         }),
-      })
-      const data = await res.json()
+      });
+      const data = await res.json();
       if (!res.ok) {
-        toast.error(data.message || "Failed to update password")
-        return
+        toast.error(data.message || "Failed to update password");
+        return;
       }
-      toast.success("Password updated successfully")
+      toast.success("Password updated successfully");
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
-      })
+      });
     } catch {
-      toast.error("Something went wrong while changing password")
+      toast.error("Something went wrong while changing password");
     } finally {
-      setChangingPassword(false)
+      setChangingPassword(false);
     }
-  }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100 hover:shadow-2xl transition-all duration-300">
@@ -54,8 +55,12 @@ const ChangePassword = () => {
           <FaShieldAlt className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
         </div>
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Security Settings</h2>
-          <p className="text-gray-500 text-sm sm:text-base">Update your password</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+            Security Settings
+          </h2>
+          <p className="text-gray-500 text-sm sm:text-base">
+            Update your password
+          </p>
         </div>
       </div>
       <div className="space-y-4 sm:space-y-6">
@@ -122,7 +127,7 @@ const ChangePassword = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChangePassword
+export default ChangePassword;

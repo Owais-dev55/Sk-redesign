@@ -7,6 +7,7 @@ import { toast } from "react-toastify"
 import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSpinner } from "react-icons/fa"
 import { useDispatch } from "react-redux"
 import { setUser } from "@/redux/slices/userSlice"
+import { API_BASE_URL } from "@/constants/constants"
 
 export default function LoginPage() {
   const dispatch = useDispatch()
@@ -40,7 +41,7 @@ export default function LoginPage() {
 
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

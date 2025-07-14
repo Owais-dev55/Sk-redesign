@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { toast } from "react-toastify"
 import { FaUser, FaEnvelope, FaLock, FaSpinner, FaUserMd } from "react-icons/fa"
+import { API_BASE_URL } from "@/constants/constants"
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -43,7 +44,7 @@ export default function Register() {
 
     setLoading(true)
     try {
-      const res = await fetch("http://localhost:3000/api/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -59,8 +60,8 @@ export default function Register() {
       } else {
         toast.error(data.message || "Registration failed")
       }
-    } catch (error) {
-      toast.error("Something went wrong. Please try again." + error)
+    } catch  {
+      toast.error("Something went wrong. Please try again.")
     } finally {
       setLoading(false)
     }

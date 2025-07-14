@@ -6,6 +6,7 @@ import { setUser } from "@/redux/slices/userSlice"
 import { useDispatch } from "react-redux"
 import ChangePassword from "../../components/ChangePassword" 
 import Image from "next/image"
+import { API_BASE_URL } from "@/constants/constants"
 
 interface UserProfile {
   _id: string
@@ -28,7 +29,7 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/profile", {
+        const res = await fetch(`${API_BASE_URL}/api/profile`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         })
         const data = await res.json()
@@ -41,8 +42,8 @@ export default function ProfilePage() {
         } else {
           toast.error(data.message || "Failed to load profile")
         }
-      } catch (err) {
-        toast.error("Error fetching profile" + err)
+      } catch  {
+        toast.error("Error fetching profile" )
       } finally {
         setLoading(false)
       }
@@ -53,7 +54,7 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     try {
       setUpdating(true)
-      const res = await fetch("http://localhost:3000/api/profile", {
+      const res = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -87,7 +88,7 @@ export default function ProfilePage() {
     const formData = new FormData()
     formData.append("image", imageFile)
     try {
-      const res = await fetch("http://localhost:3000/api/profile/upload", {
+      const res = await fetch(`${API_BASE_URL}/api/profile/upload`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
