@@ -22,58 +22,58 @@ export default function BookAppointmentModal({
     setNewTime("");
   }, [id]);
 
-  const handleBook = async () => {
-    if (!newDate || !newTime) {
-      toast.error("Please select a date and time");
+const handleBook = async () => {
+  if (!newDate || !newTime) {
+    toast.error("Please select a date and time");
+    return;
+  }
+
+  const combinedDateTime = new Date(`${newDate}T${newTime}:00`);
+  if (isNaN(combinedDateTime.getTime())) {
+    toast.error("Invalid date or time selected.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        doctorId: id,
+        datetime: `${newDate}T${newTime}:00`,
+      }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error(data.message || "Failed to book");
       return;
     }
-    const combinedDateTime = new Date(`${newDate}T${newTime}:00`);
-    if (isNaN(combinedDateTime.getTime())) {
-      toast.error("Invalid date or time selected.");
-      return;
-    }
 
-    try {
-      setLoading(true);
-      const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          doctorId: id,
-          date: newDate,
-          time: newTime,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Failed to book");
-        return;
-      }
-
-      toast.success("Appointment booked successfully");
-      router.push("/dashboard/appointments");
-      onClose(); 
-    } catch (err) {
-      toast.error("Something went wrong");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    toast.success("Appointment booked successfully");
+    router.push("/dashboard/appointments");
+    onClose(); 
+  } catch (err) {
+    toast.error("Something went wrong");
+    console.error(err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <div className="w-full h-full fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-3 sm:px-4">
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
-        <button
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center px-3 sm:px-4">
+    <div className="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
+      <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition"
           aria-label="Close modal"
         >
-          <FaTimes className="w-5 h-5" />
+          <FaTimes className="w-5 h-5 text-red-600 cursor-pointer" />
         </button>
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
           Book Appointment
@@ -124,14 +124,14 @@ export default function BookAppointmentModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-gray-600 hover:underline text-sm sm:text-base mt-2 sm:mt-0"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white bg-red-600 hover:bg-red-700 cursor-pointer  text-sm sm:text-base mt-2 sm:mt-0 "
           >
             Cancel
           </button>
           <button
             onClick={handleBook}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center cursor-pointer"
           >
             {loading ? (
               <>

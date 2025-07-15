@@ -84,12 +84,12 @@ export default function AppointmentsPage() {
         {appointments.length > 0 && (
           <div className="mb-4 sm:mb-6">
             <div className="border-b border-gray-200 overflow-x-auto">
-              <nav className="-mb-px flex space-x-4 sm:space-x-8">
+              <nav className="-mb-px flex space-x-4 sm:space-x-8 ">
                 {["all", "approved", "pending", "cancelled"].map((status) => (
                   <button
                     key={status}
                     onClick={() => setFilter(status)}
-                    className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm capitalize whitespace-nowrap transition-colors duration-200 ${
+                    className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm capitalize whitespace-nowrap transition-colors duration-200 cursor-pointer ${
                       filter === status
                         ? "border-blue-500 text-blue-600"
                         : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -120,7 +120,7 @@ export default function AppointmentsPage() {
             </p>
             <Link
               href="/dashboard/book"
-              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base" // Adjusted padding and text size
+              className="inline-flex items-center px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm sm:text-base cursor-pointer" 
             >
               Book Your First Appointment
             </Link>
@@ -135,7 +135,7 @@ export default function AppointmentsPage() {
           <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 text-center border border-gray-200">
             <p className="text-gray-600 text-sm sm:text-base">
               No appointments found for the selected filter.
-            </p>{" "}
+            </p>
           </div>
         )}
       </div>

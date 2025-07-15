@@ -74,7 +74,7 @@ export default function Navbar() {
               >
                 <button
                   onClick={toggleDropdown}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 cursor-pointer"
                 >
                   <Image
                     src={user?.image || "/icon-7797704_1280.png"}
@@ -103,7 +103,7 @@ export default function Navbar() {
                             router.push("/doctor/dashboard");
                           }
                         }}
-                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150 group"
+                        className="flex items-center w-full text-left px-4 py-3 hover:bg-gray-50 text-sm text-gray-700 transition-colors duration-150 group cursor-pointer"
                       >
                         Go to Dashboard
                       </button>
@@ -112,21 +112,9 @@ export default function Navbar() {
 
                       <button
                         onClick={handleLogout}
-                        className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 text-sm transition-colors duration-150 group"
+                        className="flex items-center w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 text-sm transition-colors duration-150 group cursor-pointer"
                       >
-                        <svg
-                          className="w-4 h-4 mr-3 text-red-400 group-hover:text-red-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                          />
-                        </svg>
+                       
                         Logout
                       </button>
                     </div>

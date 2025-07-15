@@ -1,5 +1,6 @@
 "use client"
 import Image from "next/image"
+import Link from "next/link"
 import {
   FaCalendarAlt,
   FaComments,
@@ -26,14 +27,18 @@ export default function ClinicalHomepage() {
                 </p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <Link href='/Doctors'> 
+                <button className="inline-flex items-center justify-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer">
                   <FaCalendarAlt className="w-5 h-5 mr-2" />
-                  Book Appointment
+                 Book Appointment 
                 </button>
-                <button className="inline-flex items-center justify-center px-8 py-3 border-2 border-teal-600 text-teal-600 hover:bg-teal-50 rounded-lg font-medium transition-colors">
+                </Link>
+                <Link href='/Doctors'> 
+                <button className="inline-flex items-center justify-center px-8 py-3 border-2 border-teal-600 text-teal-600 hover:bg-teal-50 rounded-lg font-medium transition-colors cursor-pointer">
                   <FaComments className="w-5 h-5 mr-2" />
-                  Consult Now
+                 Consult Now
                 </button>
+                </Link>
               </div>
               </div>
             <div className="relative">

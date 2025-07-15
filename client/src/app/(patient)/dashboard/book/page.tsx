@@ -54,7 +54,7 @@ export default function BookAppointmentPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ doctorId: selectedDoctor, date, time }),
+        body: JSON.stringify({ doctorId: selectedDoctor, datetime: `${date}T${time}:00`,}),
       });
       const data = await res.json();
       if (!res.ok) {

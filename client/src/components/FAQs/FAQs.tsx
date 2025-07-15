@@ -58,15 +58,14 @@ const FAQs = () => {
           </p>
         </div>
 
-        {/* FAQ Items */}
         <div className="w-full max-w-3xl mx-auto flex flex-col gap-y-4">
           {questions.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out border border-gray-100 hover:shadow-lg"
+              className="bg-white rounded-xl shadow-md overflow-hidden transition-all duration-300 ease-in-out border border-gray-100 hover:shadow-lg "
             >
               <button
-                className="flex justify-between items-center w-full p-5 text-left focus:outline-none"
+                className="flex justify-between items-center w-full p-5 text-left focus:outline-none cursor-pointer"
                 onClick={() => handleToggleQuestion(item.id)}
                 aria-expanded={openQuestionId === item.id}
                 aria-controls={`faq-answer-${item.id}`}

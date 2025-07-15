@@ -38,17 +38,16 @@ const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.createAppointment = createAppointment;
 const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        const { doctorId, date, time } = req.body;
-        const patientId = req.user.id;
-        if (!doctorId || !date || !time) {
-            return res
-                .status(400)
-                .json({ message: "Doctor ID, Date, and Time are required." });
+        const { doctorId, datetime } = req.body;
+        const patientId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        if (!doctorId || !datetime) {
+            return res.status(400).json({ message: "Doctor ID and datetime are required." });
         }
-        const combinedDateTime = new Date(`${date}T${time}:00`);
+        const combinedDateTime = new Date(datetime);
         if (isNaN(combinedDateTime.getTime())) {
-            return res.status(400).json({ message: "Invalid date or time format." });
+            return res.status(400).json({ message: "Invalid datetime format." });
         }
         const hours = combinedDateTime.getHours();
         const minutes = combinedDateTime.getMinutes();
@@ -57,7 +56,7 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         }
         const doctor = yield prisma.user.findUnique({ where: { id: doctorId } });
         if (!doctor || doctor.role !== "DOCTOR") {
-            return res.status(404).json({ message: "Doctor not found." });
+            return res.status(404).json({ message: "Doctor not found or invalid role." });
         }
         const appointment = yield prisma.appointment.create({
             data: {
@@ -66,13 +65,14 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 date: combinedDateTime,
             },
         });
-        res
-            .status(201)
-            .json({ message: "Appointment booked successfully!", appointment });
+        return res.status(201).json({
+            message: "Appointment booked successfully!",
+            appointment,
+        });
     }
     catch (error) {
         console.error("Booking Error:", error);
-        res.status(500).json({ message: "Internal server error." });
+        return res.status(500).json({ message: "Internal server error." });
     }
 });
 exports.bookAppointment = bookAppointment;
@@ -202,9 +202,7 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
         }
         if (appointment.status === "cancelled" ||
             appointment.status === "completed") {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 message: `Cannot reschedule a ${appointment.status} appointment`,
             });
         }
@@ -213,21 +211,21 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 .status(400)
                 .json({ message: "New date and time are required" });
         }
-        const combinedDateTime = new Date(`${newDate}T${newTime}`);
-        if (isNaN(combinedDateTime.getTime())) {
+        const [hours, minutes] = newTime.split(":").map(Number);
+        const combinedDate = new Date(newDate);
+        combinedDate.setHours(hours, minutes, 0, 0); // Set time to the date
+        if (isNaN(combinedDate.getTime())) {
             return res.status(400).json({ message: "Invalid date or time format." });
         }
-        const hours = combinedDateTime.getHours();
-        const minutes = combinedDateTime.getMinutes();
         if (hours < 9 || (hours >= 17 && minutes > 0)) {
-            return res
-                .status(400)
-                .json({ message: "Appointments allowed only between 09:00 and 17:00." });
+            return res.status(400).json({
+                message: "Appointments allowed only between 09:00 A.M and 5.00 P.M",
+            });
         }
         const updated = yield prisma.appointment.update({
             where: { id: appointmentId },
             data: {
-                date: combinedDateTime,
+                date: combinedDate,
                 status: "upcoming",
             },
         });
@@ -247,7 +245,8 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
         const drId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const { appointmentId } = req.params;
         const { status, newDate, newTime } = req.body;
-        if (!["approved", "cancelled", "reschedule", "upcoming"].includes(status)) {
+        const validStatuses = ["approved", "cancelled", "upcoming"];
+        if (!validStatuses.includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
         const appointment = yield prisma.appointment.findUnique({
@@ -259,12 +258,12 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
         if (appointment.doctorId !== drId) {
             return res.status(403).json({ message: "Unauthorized action" });
         }
-        if (appointment.status === "cancelled" || appointment.status === "completed") {
+        if (["cancelled", "completed"].includes(appointment.status)) {
             return res.status(400).json({ message: `Cannot update a ${appointment.status} appointment` });
         }
         const updateData = { status };
-        if (status === "reschedule" || status === "upcoming") {
-            if (!newDate || !newTime) {
+        if (status === "upcoming") {
+            if (typeof newDate !== "string" || typeof newTime !== "string") {
                 return res.status(400).json({ message: "Reschedule requires new date and time" });
             }
             const combinedDateTime = new Date(`${newDate}T${newTime}`);

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { FaTimes, FaSpinner, } from "react-icons/fa";
+import { FaTimes, FaSpinner } from "react-icons/fa";
 import { API_BASE_URL } from "@/constants/constants";
 
 interface RescheduleModalProps {
@@ -24,13 +24,6 @@ export default function RescheduleModal({
       toast.error("Please select a new date and time");
       return;
     }
-    const combinedDateTime = new Date(`${newDate}T${newTime}:00`);
-    if (isNaN(combinedDateTime.getTime())) {
-      toast.error("Invalid date or time selected.");
-      return;
-    }
-    const newDateISO = newDate;
-    const newTimeISO = newTime;
 
     try {
       setLoading(true);
@@ -42,14 +35,16 @@ export default function RescheduleModal({
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
-          body: JSON.stringify({ newDate: newDateISO, newTime: newTimeISO }),
+          body: JSON.stringify({ newDate, newTime }),
         }
       );
+
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.message || "Failed to reschedule");
         return;
       }
+
       toast.success("Appointment rescheduled successfully");
       refetch();
       onClose();
@@ -62,8 +57,8 @@ export default function RescheduleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-3 sm:px-4">
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center px-3 sm:px-4">
+      <div className="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
         <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition"
@@ -104,8 +99,7 @@ export default function RescheduleModal({
               <input
                 type="time"
                 id="newTime"
-                min="09:00"
-                max="17:00"
+                step="60"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
                 className="w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base transition-colors"

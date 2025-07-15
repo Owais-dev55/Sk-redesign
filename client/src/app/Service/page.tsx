@@ -53,7 +53,7 @@ const Services = () => {
   return (
     <section className="bg-gray-50 py-20" id="services">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero */}
+        
         <div className="text-center mb-14 space-y-4">
           <span className="inline-block px-4 py-1 bg-blue-100 text-blue-700 text-sm font-semibold rounded-full">
             Our Services
@@ -83,7 +83,7 @@ const Services = () => {
 
               <p className="text-sm text-slate-600">{service.description}</p>
               <Link href={`/Doctors?speciality=${service.title}`}>
-                <button className="mt-4 inline-block text-blue-600 hover:underline font-medium text-sm">
+                <button className="mt-4 inline-block text-blue-600 hover:underline font-medium text-sm cursor-pointer">
                   Book Now →
                 </button>
               </Link>

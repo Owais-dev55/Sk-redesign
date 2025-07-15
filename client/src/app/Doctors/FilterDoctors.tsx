@@ -45,7 +45,7 @@ const Filter: React.FC<FilterProps> = ({
             <select
               value={selectedSpecialty}
               onChange={(e) => setSelectedSpecialty(e.target.value)}
-              className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none min-w-[200px] bg-white"
+              className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none min-w-[200px] cursor-pointer bg-white"
             >
               <option value="all">All Specialties</option>
               {specialties.map((specialty) => (

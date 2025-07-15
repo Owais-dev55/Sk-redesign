@@ -64,7 +64,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     const fetchSpecality = async () => {
-      const res = await fetch(`${API_BASE_URL}/specality`)
+      const res = await fetch(`${API_BASE_URL}/api/specality`)
       const data = await res.json()
       if (!res.ok) {
         toast.error(data.message || "Failed to load fetch specality");
@@ -229,7 +229,7 @@ export default function ProfilePage() {
                       setPreviewUrl(URL.createObjectURL(e.target.files[0]));
                     }
                   }}
-                  className="block w-full text-xs sm:text-sm text-gray-500 file:mr-3 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-xs sm:text-sm text-gray-500 file:mr-3 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 />
               </div>
               {previewUrl && (
@@ -268,7 +268,7 @@ export default function ProfilePage() {
                     speciality: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 sm:px-4 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-sm sm:text-base"
+                className="w-full px-3 py-2 sm:px-4 sm:py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 focus:bg-white text-sm sm:text-base cursor-pointer"
               >
                 <option value="">Select Speciality</option>
                 {specality.map((spec) => (
@@ -279,7 +279,7 @@ export default function ProfilePage() {
               </select>
               <div className="pt-2">
                 <button
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 px-4 sm:py-3 sm:px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base"
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-2.5 px-4 sm:py-3 sm:px-6 rounded-xl font-bold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none text-sm sm:text-base cursor-pointer"
                   onClick={handleUpdateProfile}
                   disabled={updating}
                 >

@@ -62,14 +62,14 @@ export default function RescheduleModal({ appointmentId, onClose, refetch }: Res
 
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center px-3 sm:px-4">
-      <div className="bg-white p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
-        <button
+      <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center px-3 sm:px-4">
+  <div className="bg-white/90 backdrop-blur-md p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-sm sm:max-w-md relative">
+     <button
           onClick={onClose}
           className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition"
           aria-label="Close modal"
         >
-          <FaTimes className="w-5 h-5" />
+          <FaTimes className="w-5 h-5 text-red-600" />
         </button>
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">Reschedule Appointment</h2>
         <div className="grid gap-4 py-4">
@@ -109,14 +109,14 @@ export default function RescheduleModal({ appointmentId, onClose, refetch }: Res
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-gray-600 hover:underline text-sm sm:text-base mt-2 sm:mt-0"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-white hover:bg-red-700 text-sm sm:text-base mt-2 sm:mt-0 bg-red-600 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleReschedule}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center cursor-pointer"
           >
             {loading ? (
               <>

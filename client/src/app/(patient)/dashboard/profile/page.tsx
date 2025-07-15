@@ -183,7 +183,7 @@ export default function ProfilePage() {
                       setPreviewUrl(URL.createObjectURL(e.target.files[0]))
                     }
                   }}
-                  className="block w-full text-xs sm:text-sm text-gray-500 file:mr-3 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-xs sm:text-sm text-gray-500 file:mr-3 sm:file:mr-4 file:py-1.5 sm:file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs sm:file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                 />
               </div>
               {previewUrl && (
@@ -222,7 +222,7 @@ export default function ProfilePage() {
                       Updating Profile...
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center cursor-pointer">
                       <FaEdit className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
                       Update Profile
                     </div>

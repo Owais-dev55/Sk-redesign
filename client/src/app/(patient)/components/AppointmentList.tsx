@@ -124,7 +124,7 @@ export default function AppointmentList({
                     </div>
                     <div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                        {appointment.doctor.name}
+                        {appointment.doctor.name.toLowerCase().startsWith("dr") ? appointment.doctor.name :  `Dr. ${appointment.doctor.name}`}
                       </h3>
                       {appointment.doctor.specialty && (
                         <p className="text-xs sm:text-sm text-gray-600">
@@ -173,7 +173,7 @@ export default function AppointmentList({
                     appointment.status.toLowerCase() === "upcoming" && (
                       <div className="mt-2 flex space-x-2">
                         <button
-                          className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                          className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                           onClick={() => openModal(appointment.id)}
                         >
                           Reschedule
