@@ -5,7 +5,7 @@ import { API_BASE_URL } from "@/constants/constants";
 import { io } from "socket.io-client";
 import { FiSend, FiUser, FiArrowLeft } from "react-icons/fi";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 const socket = io(`${API_BASE_URL}`);
 
 interface Message {
@@ -23,9 +23,11 @@ interface ChatProps {
 }
 
 export default function Chat({ currentUserId, receiverId }: ChatProps) {
+  const router = useRouter()
   const [receiverInfo, setReceiverInfo] = useState<{
     name: string;
     image?: string;
+    role: string
   } | null>(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -101,6 +103,7 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
         setReceiverInfo({
           name: data.name,
           image: data.image,
+          role: data.role
         });
       } catch (err) {
         console.error("Failed to fetch receiver name", err);
@@ -128,9 +131,7 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
     <div className="flex flex-col h-screen bg-gray-100">
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-gray-100 rounded-full transition-colors md:hidden">
-            <FiArrowLeft className="w-5 h-5 text-gray-600" />
-          </button>
+        
           <div className="relative">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
               <Image
@@ -143,7 +144,7 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
           </div>
           <div>
             <h3 className="font-semibold text-gray-900">
-              {receiverInfo?.name}
+              {receiverInfo?.role === "DOCTOR" ? receiverInfo.name.toLowerCase().startsWith("dr") ? receiverInfo.name :  `Dr . ${receiverInfo.name}` : receiverInfo?.name  }
             </h3>
           </div>
         </div>

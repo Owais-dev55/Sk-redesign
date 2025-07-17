@@ -166,7 +166,7 @@ export default function Navbar() {
               Services
             </Link>
             <Link
-              href="/doctors"
+              href="/Doctors"
               className="nav-link-mob"
               onClick={() => setIsMenuOpen(false)}
             >
