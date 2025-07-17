@@ -3,11 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { API_BASE_URL } from "@/constants/constants";
 import { io } from "socket.io-client";
-import {
-  FiSend,
-  FiUser,
-  FiArrowLeft,
-} from "react-icons/fi";
+import { FiSend, FiUser, FiArrowLeft } from "react-icons/fi";
 import Image from "next/image";
 
 const socket = io(`${API_BASE_URL}`);
@@ -52,7 +48,7 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
     const fetchMessages = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/api/messages/${currentUserId}/${receiverId}`
+          `${API_BASE_URL}/api/messages/${currentUserId}/${receiverId}`
         );
         const data = await res.json();
         setMessages(data);
@@ -100,7 +96,7 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
   useEffect(() => {
     const fetchReceiverName = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/user/${receiverId}`);
+        const res = await fetch(`${API_BASE_URL}/api/user/${receiverId}`);
         const data = await res.json();
         setReceiverInfo({
           name: data.name,
@@ -150,9 +146,9 @@ export default function Chat({ currentUserId, receiverId }: ChatProps) {
               {receiverInfo?.name}
             </h3>
           </div>
-        </div>       
+        </div>
       </div>
-<div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4">
