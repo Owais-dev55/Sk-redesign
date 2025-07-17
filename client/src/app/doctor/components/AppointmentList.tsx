@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import RescheduleModal from "./ResheduleModal";
 import { useState } from "react";
 import { API_BASE_URL } from "@/constants/constants";
+import { useRouter } from "next/navigation";
 
 interface Appointment {
   id: string;
@@ -19,6 +20,7 @@ interface Appointment {
   type?: string;
   notes?: string;
   patient: {
+    id:string
     name: string;
     email: string;
   };
@@ -59,7 +61,15 @@ export default function AppointmentList({
   appointments: Appointment[];
   refetch: () => void;
 }) {
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleChatClick = (patientId: string) => {
+    router.push(`/doctor/chat/${patientId}`);
+    console.log(patientId)
+  };
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    string | null
+  >(null);
   const [showModal, setShowModal] = useState(false);
   const openModal = (id: string) => {
     setSelectedAppointmentId(id);
@@ -72,17 +82,14 @@ export default function AppointmentList({
 
   const handleCancel = async (id: string) => {
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/appointments/doctor/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({ status: "cancelled" }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/appointments/doctor/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ status: "cancelled" }),
+      });
 
       const data = await res.json();
       if (!res.ok) {
@@ -99,17 +106,14 @@ export default function AppointmentList({
 
   const handleApprove = async (id: string) => {
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/appointments/doctor/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ status: "approved" }),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/appointments/doctor/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "approved" }),
+      });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.message || "Failed to approve appointment");
@@ -219,6 +223,15 @@ export default function AppointmentList({
                               onClick={() => handleCancel(appointment.id)}
                             >
                               Cancel
+                            </button>
+                            <span className="text-gray-300">|</span>
+                            <button
+                              className="text-xs sm:text-sm text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
+                              onClick={() =>
+                                handleChatClick(appointment.patient.id)
+                              }
+                            >
+                              Chat
                             </button>
                           </>
                         )}

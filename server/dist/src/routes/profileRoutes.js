@@ -15,4 +15,5 @@ router.put("/change-password", authMiddleware_1.authMiddlewWare, fetchController
 router.post('/profile/upload', authMiddleware_1.authMiddlewWare, upload.single("image"), fetchController_1.uploadImage);
 router.get('/doctors', fetchController_1.fetchDoctors);
 router.get('/specality', fetchController_1.specality);
+router.get('/user/:id', fetchController_1.getUserById);
 exports.default = router;

@@ -1,6 +1,6 @@
 import express from "express";
 import { authMiddlewWare } from "../middlewares/authMiddleware";
-import { getuserProfile, updateuserProfile , changePassword, uploadImage, fetchDoctors, specality  } from "../controllers/fetchController";
+import { getuserProfile, updateuserProfile , changePassword, uploadImage, fetchDoctors, specality,  getUserById  } from "../controllers/fetchController";
 import multer from "multer";
 
 const upload = multer({ storage: multer.memoryStorage() });
@@ -13,5 +13,6 @@ router.post('/profile/upload' , authMiddlewWare , upload.single("image"),uploadI
 
 router.get('/doctors', fetchDoctors)
 router.get('/specality' , specality)
+router.get('/user/:id' , getUserById)
 
 export default router

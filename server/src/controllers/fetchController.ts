@@ -158,19 +158,46 @@ export const specality = async (req: Request, res: Response) => {
   }
 };
 
-export const fetchDoctors = async (req:Request , res:Response) => {
+export const fetchDoctors = async (req: Request, res: Response) => {
   try {
-     const doctors = await prisma.user.findMany({
+    const doctors = await prisma.user.findMany({
       where: { role: "DOCTOR" },
-      select: { id: true, name: true, role:true , speciality:true , image:true }, 
-    }) 
-   res.status(200).json({ doctors });
-
-  }catch(err){
-     console.error("Error fetching doctors:", err)
-     res.json(
-      { message: "Failed to fetch doctors" },
-      { status: 500 }
-    )
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        speciality: true,
+        image: true,
+      },
+    });
+    res.status(200).json({ doctors });
+  } catch (err) {
+    console.error("Error fetching doctors:", err);
+    res.json({ message: "Failed to fetch doctors" }, { status: 500 });
   }
-}
+};
+
+export const getUserById = async (req: Request, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.params.id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true, 
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching user:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+

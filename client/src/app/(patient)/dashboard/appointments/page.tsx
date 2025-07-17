@@ -9,6 +9,7 @@ import { API_BASE_URL } from "@/constants/constants";
 interface Appointment {
   id: string;
   doctor: {
+    id:string
     name: string;
     specialty?: string;
     image: string;

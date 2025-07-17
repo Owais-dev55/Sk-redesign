@@ -11,10 +11,11 @@ import { toast } from "react-toastify";
 import RescheduleModal from "../components/RescheduleModal";
 import { useState } from "react";
 import { API_BASE_URL } from "@/constants/constants";
-
+import {useRouter} from 'next/navigation'
 interface Appointment {
   id: string;
   doctor: {
+    id:string
     name: string;
     specialty?: string;
     image: string;
@@ -92,7 +93,10 @@ export default function AppointmentList({
       toast.error("Something went wrong" + error);
     }
   };
-  
+  const router = useRouter()
+   const handleChatClick = (doctorId: string) => {
+    router.push(`/dashboard/chat/${doctorId}`);
+  };
   return (
     <div className="space-y-3 sm:space-y-4">
       {appointments.map((appointment) => {
@@ -184,6 +188,13 @@ export default function AppointmentList({
                           onClick={() => handleCancel(appointment.id)}
                         >
                           Cancel
+                        </button>
+                         <span className="text-gray-300">|</span>
+                        <button
+                          className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
+                          onClick={() => handleChatClick(appointment.doctor.id)}
+                        >
+                          chat
                         </button>
                       </div>
                     )}

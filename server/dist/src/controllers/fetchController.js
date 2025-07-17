@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.fetchDoctors = exports.specality = exports.uploadImage = exports.changePassword = exports.updateuserProfile = exports.getuserProfile = void 0;
+exports.getUserById = exports.fetchDoctors = exports.specality = exports.uploadImage = exports.changePassword = exports.updateuserProfile = exports.getuserProfile = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const prisma = new client_1.PrismaClient();
@@ -158,7 +158,13 @@ const fetchDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         const doctors = yield prisma.user.findMany({
             where: { role: "DOCTOR" },
-            select: { id: true, name: true, role: true, speciality: true, image: true },
+            select: {
+                id: true,
+                name: true,
+                role: true,
+                speciality: true,
+                image: true,
+            },
         });
         res.status(200).json({ doctors });
     }
@@ -168,3 +174,26 @@ const fetchDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.fetchDoctors = fetchDoctors;
+const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield prisma.user.findUnique({
+            where: { id: req.params.id },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                image: true,
+                role: true,
+            },
+        });
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(user);
+    }
+    catch (err) {
+        console.error("Error fetching user:", err);
+        res.status(500).json({ message: "Server error" });
+    }
+});
+exports.getUserById = getUserById;

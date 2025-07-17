@@ -8,29 +8,44 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role
-  createdAt DateTime @default(now())
-  image     String?
- speciality String?
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role
+  createdAt  DateTime @default(now())
+  image      String?
+  speciality String?
 
   doctorAppointments  Appointment[] @relation("DoctorAppointments")
   patientAppointments Appointment[] @relation("PatientAppointments")
+
+  SentMessages     Message[] @relation("SentMessages")
+  ReceivedMessages Message[] @relation("ReceivedMessages")
 }
 
 model Appointment {
-  id         String   @id @default(uuid())
-  patientId  String
-  doctorId   String
-  date       DateTime
-  status     String   @default("upcoming")
+  id        String   @id @default(uuid())
+  patientId String
+  doctorId  String
+  date      DateTime
+  status    String   @default("upcoming")
 
-  patient    User     @relation("PatientAppointments", fields: [patientId], references: [id])
-  doctor     User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
-  createdAt  DateTime @default(now())
+  patient   User     @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctor    User     @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  timestamp  DateTime @default(now())
+  read       Boolean  @default(false)
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
 }
 
 enum Role {

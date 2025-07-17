@@ -17,6 +17,7 @@ interface Appointment {
     specialty?: string
   }
   patient: {
+    id:string
     name: string
     email: string
   }
