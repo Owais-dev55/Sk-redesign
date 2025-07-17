@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import type React from "react";
 import { API_BASE_URL } from "@/constants/constants";
 import { io } from "socket.io-client";
-import { FiSend, FiUser, FiArrowLeft } from "react-icons/fi";
+import { FiSend, FiUser } from "react-icons/fi";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+
 const socket = io(`${API_BASE_URL}`);
 
 interface Message {
@@ -23,7 +23,7 @@ interface ChatProps {
 }
 
 export default function Chat({ currentUserId, receiverId }: ChatProps) {
-  const router = useRouter()
+  
   const [receiverInfo, setReceiverInfo] = useState<{
     name: string;
     image?: string;
