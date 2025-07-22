@@ -160,7 +160,7 @@ export default function Navbar() {
                   <div className="flex items-center space-x-2 px-3 py-2">
                     <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
                       <Image
-                        src={user?.image || "/client/public/icon-7797704_1280.png"}
+                        src={user?.image || "/icon-7797704_1280.png"}
                         alt="user-image"
                         width={40} 
                         height={40} 
@@ -170,7 +170,7 @@ export default function Navbar() {
                     <span className="text-gray-700 font-medium">
                       Welcome,{" "}
                       {user.role === "DOCTOR"
-                        ? user.name.toLowerCase().startsWith("dr.")
+                        ? user.name.toLowerCase().startsWith("dr.") || user.name.toLowerCase().startsWith("dr")
                           ? user.name
                           : `Dr. ${user.name}`
                         : user.name}

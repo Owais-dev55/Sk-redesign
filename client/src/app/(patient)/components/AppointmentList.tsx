@@ -11,11 +11,12 @@ import { toast } from "react-toastify";
 import RescheduleModal from "../components/RescheduleModal";
 import { useState } from "react";
 import { API_BASE_URL } from "@/constants/constants";
-import {useRouter} from 'next/navigation'
+import { useRouter } from "next/navigation";
+import { PiChatCircleDuotone } from "react-icons/pi";
 interface Appointment {
   id: string;
   doctor: {
-    id:string
+    id: string;
     name: string;
     specialty?: string;
     image: string;
@@ -61,7 +62,9 @@ export default function AppointmentList({
         return "bg-gray-50 text-gray-700 border-gray-200";
     }
   };
-  const [selectedAppointmentId, setSelectedAppointmentId] = useState<string | null>(null);
+  const [selectedAppointmentId, setSelectedAppointmentId] = useState<
+    string | null
+  >(null);
   const [showModal, setShowModal] = useState(false);
   const openModal = (id: string) => {
     setSelectedAppointmentId(id);
@@ -73,15 +76,12 @@ export default function AppointmentList({
   };
   const handleCancel = async (id: string) => {
     try {
-      const res = await fetch(
-        `${API_BASE_URL}/api/appointments/cancel/${id}`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/api/appointments/cancel/${id}`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.message || "Failed to cancel appointment");
@@ -93,8 +93,8 @@ export default function AppointmentList({
       toast.error("Something went wrong" + error);
     }
   };
-  const router = useRouter()
-   const handleChatClick = (doctorId: string) => {
+  const router = useRouter();
+  const handleChatClick = (doctorId: string) => {
     router.push(`/dashboard/chat/${doctorId}`);
   };
   return (
@@ -128,7 +128,9 @@ export default function AppointmentList({
                     </div>
                     <div>
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900">
-                        {appointment.doctor.name.toLowerCase().startsWith("dr") ? appointment.doctor.name :  `Dr. ${appointment.doctor.name}`}
+                        {appointment.doctor.name.toLowerCase().startsWith("dr")
+                          ? appointment.doctor.name
+                          : `Dr. ${appointment.doctor.name}`}
                       </h3>
                       {appointment.doctor.specialty && (
                         <p className="text-xs sm:text-sm text-gray-600">
@@ -175,27 +177,38 @@ export default function AppointmentList({
                   </div>
                   {isUpcoming &&
                     appointment.status.toLowerCase() === "upcoming" && (
-                      <div className="mt-2 flex space-x-2">
-                        <button
-                          className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-                          onClick={() => openModal(appointment.id)}
-                        >
-                          Reschedule
-                        </button>
-                        <span className="text-gray-300">|</span>
-                        <button
-                          className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
-                          onClick={() => handleCancel(appointment.id)}
-                        >
-                          Cancel
-                        </button>
-                         <span className="text-gray-300">|</span>
-                        <button
-                          className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
-                          onClick={() => handleChatClick(appointment.doctor.id)}
-                        >
-                          chat
-                        </button>
+                      <div className="mt-3 space-y-3">
+                        <div className="flex items-center gap-2">
+                          <button
+                            className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium"
+                            onClick={() => openModal(appointment.id)}
+                          >
+                            Reschedule
+                          </button>
+                          <span className="text-gray-300">|</span>
+                          <button
+                            className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium"
+                            onClick={() => handleCancel(appointment.id)}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        <div className="pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between gap-5">
+                            <span className="text-xs text-gray-500">
+                              Need to discuss something?
+                            </span>
+                            <button
+                              className="text-xs sm:text-sm px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 rounded-md font-medium hover:from-blue-100 hover:to-indigo-100 border border-blue-200 hover:border-blue-300 transition-all duration-200 flex items-center gap-1.5"
+                              onClick={() =>
+                                handleChatClick(appointment.doctor.id)
+                              }
+                            >
+                              <PiChatCircleDuotone className="w-4 h-4" />
+                              Start Chat
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                 </div>

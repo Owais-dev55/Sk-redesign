@@ -372,19 +372,42 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
                     message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
                 });
             }
+            const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
+                weekday: "long",
+            });
+            const availability = yield prisma.schedule.findFirst({
+                where: { doctorId: drId, day: dayOfWeek },
+            });
+            if (!availability) {
+                return res
+                    .status(400)
+                    .json({ message: "Doctor is not available on this day." });
+            }
+            const [startHour, startMinute] = availability.startTime
+                .split(":")
+                .map(Number);
+            const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+            const requestedTime = hours * 60 + minutes;
+            const availableStart = startHour * 60 + startMinute;
+            const availableEnd = endHour * 60 + endMinute;
+            if (requestedTime < availableStart || requestedTime >= availableEnd) {
+                return res.status(400).json({
+                    message: `Doctor is only available between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
+                });
+            }
             updateData.date = combinedDateTime;
         }
         const updated = yield prisma.appointment.update({
             where: { id: appointmentId },
             data: updateData,
         });
-        res
+        return res
             .status(200)
             .json({ message: "Appointment updated", appointment: updated });
     }
     catch (err) {
         console.error("Update appointment status error:", err);
-        res.status(500).json({ message: "Server error" });
+        return res.status(500).json({ message: "Server error" });
     }
 });
 exports.updateAppointmentStatus = updateAppointmentStatus;

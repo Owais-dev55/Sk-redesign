@@ -5,12 +5,14 @@ import {
   FaClock,
   FaExclamationCircle,
   FaTimesCircle,
+  FaUser,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import RescheduleModal from "./ResheduleModal";
 import { useState } from "react";
 import { API_BASE_URL } from "@/constants/constants";
 import { useRouter } from "next/navigation";
+import { PiChatCircleDuotone } from "react-icons/pi";
 
 interface Appointment {
   id: string;
@@ -62,19 +64,21 @@ export default function AppointmentList({
   refetch: () => void;
 }) {
   const router = useRouter();
-
   const handleChatClick = (patientId: string) => {
     router.push(`/doctor/chat/${patientId}`);
     console.log(patientId);
   };
+
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
   >(null);
   const [showModal, setShowModal] = useState(false);
+
   const openModal = (id: string) => {
     setSelectedAppointmentId(id);
     setShowModal(true);
   };
+
   const closeModal = () => {
     setSelectedAppointmentId(null);
     setShowModal(false);
@@ -90,13 +94,11 @@ export default function AppointmentList({
         },
         body: JSON.stringify({ status: "cancelled" }),
       });
-
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.message || "Failed to cancel appointment");
         return;
       }
-
       toast.success("Appointment cancelled");
       refetch();
     } catch (error) {
@@ -127,38 +129,41 @@ export default function AppointmentList({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br py-8 px-4">
-      {appointments.length === 0 ? (
-        <p className="text-center text-gray-600">No appointments found.</p>
-      ) : (
-        <div className="space-y-4">
-          {appointments.map((appointment) => {
-            const dateObj = new Date(appointment.date);
-            const date = dateObj.toLocaleDateString("en-US", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            });
-            const time = dateObj.toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
-            const isUpcoming = dateObj > new Date();
+    <div className="space-y-3 sm:space-y-4">
+      {appointments.map((appointment) => {
+        const dateObj = new Date(appointment.date);
+        const date = dateObj.toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+        const time = dateObj.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const isUpcoming = dateObj > new Date();
 
-            return (
-              <div
-                key={appointment.id}
-                className={`bg-white rounded-xl shadow-sm border transition-all duration-200 hover:shadow-md ${
-                  isUpcoming
-                    ? "border-l-4 border-l-blue-500 p-4 sm:p-6"
-                    : "border-gray-200 p-4"
-                }`}
-              >
-                <div>
-                  <p className="text-lg font-semibold text-gray-800">
-                    Patient: {appointment.patient?.name || "Unknown"}
-                  </p>
+        return (
+          <div
+            key={appointment.id}
+            className={`bg-white rounded-xl shadow-sm border transition-all duration-200 hover:shadow-md ${
+              isUpcoming ? "border-l-4 border-l-blue-500" : "border-gray-200"
+            }`}
+          >
+            <div className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center mb-2 sm:mb-3">
+                    <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg mr-2 sm:mr-3">
+                      <FaUser className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                        Patient: {appointment.patient?.name || "Unknown"}
+                      </h3>
+                    </div>
+                  </div>
                   <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4 md:space-x-6">
                     <div className="flex items-center text-gray-600 text-xs sm:text-sm">
                       <FaCalendarAlt className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
@@ -184,7 +189,6 @@ export default function AppointmentList({
                     </div>
                   )}
                 </div>
-
                 <div className="mt-3 sm:mt-0 sm:ml-6 flex flex-col items-start sm:items-end">
                   <div
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(
@@ -196,50 +200,61 @@ export default function AppointmentList({
                       {appointment.status}
                     </span>
                   </div>
-
                   {isUpcoming &&
                     ["upcoming", "reschedule"].includes(
                       appointment.status.toLowerCase()
                     ) && (
-                      <div className="mt-2 flex space-x-2">
-                        {appointment.status.toLowerCase() === "upcoming" && (
-                          <>
+                      <div className="mt-3 space-y-3">
+                        <div className="flex items-center gap-2">
+                          {appointment.status.toLowerCase() === "upcoming" && (
+                            <>
+                              <button
+                                className="text-xs sm:text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer"
+                                onClick={() => handleApprove(appointment.id)}
+                              >
+                                Approve
+                              </button>
+                              <span className="text-gray-300">|</span>
+                              <button
+                                className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                                onClick={() => openModal(appointment.id)}
+                              >
+                                Reschedule
+                              </button>
+                              <span className="text-gray-300">|</span>
+                              <button
+                                className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
+                                onClick={() => handleCancel(appointment.id)}
+                              >
+                                Cancel
+                              </button>
+                            </>
+                          )}
+                        </div>
+                        <div className="pt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between gap-5">
+                            <span className="text-xs text-gray-500">
+                              Connect with patient ?
+                            </span>
                             <button
-                              className="text-xs sm:text-sm text-green-600 hover:text-green-700 font-medium cursor-pointer"
-                              onClick={() => handleApprove(appointment.id)}
+                              className="text-xs sm:text-sm px-3 py-1.5 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 rounded-md font-medium hover:from-purple-100 hover:to-violet-100 border border-purple-200 hover:border-purple-300 transition-all duration-200 flex items-center gap-1.5"
+                              onClick={() =>
+                                handleChatClick(appointment.patient.id)
+                              }
                             >
-                              Approve
+                              <PiChatCircleDuotone className="w-4 h-4" />
+                              Start Chat
                             </button>
-                            <span className="text-gray-300">|</span>
-                            <button
-                              className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-                              onClick={() => openModal(appointment.id)}
-                            >
-                              Reschedule
-                            </button>
-                            <span className="text-gray-300">|</span>
-                            <button
-                              className="text-xs sm:text-sm text-red-600 hover:text-red-700 font-medium cursor-pointer"
-                              onClick={() => handleCancel(appointment.id)}
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        )}
+                          </div>
+                        </div>
                       </div>
                     )}
-                  <button
-                    className="text-xs sm:text-sm text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
-                    onClick={() => handleChatClick(appointment.patient.id)}
-                  >
-                    Chat
-                  </button>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+            </div>
+          </div>
+        );
+      })}
       {showModal && selectedAppointmentId && (
         <RescheduleModal
           appointmentId={selectedAppointmentId}
