@@ -1,6 +1,7 @@
 "use client";
 
 import Chat from "@/app/doctor/components/Chat";
+import CustomLoader from "@/components/Loader/CustomLoader";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -25,8 +26,13 @@ export default function PatientChatPage() {
     }
   }, []);
 
-  if (loading) return <p className="p-6 text-gray-600">Loading chat...</p>;
-
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <CustomLoader />
+      </div>
+    )
+  }
   if (!patientId)
     return (
       <p className="p-6 text-red-600">

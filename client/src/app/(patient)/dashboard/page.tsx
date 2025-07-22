@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { FaSpinner, FaCalendarAlt, FaCalendarPlus, FaUser } from "react-icons/fa"
+import {  FaCalendarAlt, FaCalendarPlus, FaUser } from "react-icons/fa"
+import CustomLoader from "@/components/Loader/CustomLoader"
 
 interface User {
   name: string
@@ -49,11 +50,8 @@ export default function PatientDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg text-center">
-          <FaSpinner className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 text-sm sm:text-base">Loading dashboard...</p>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <CustomLoader />
       </div>
     )
   }

@@ -164,13 +164,20 @@ const fetchDoctors = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 role: true,
                 speciality: true,
                 image: true,
+                schedules: {
+                    select: {
+                        day: true,
+                        startTime: true,
+                        endTime: true,
+                    },
+                },
             },
         });
         res.status(200).json({ doctors });
     }
     catch (err) {
         console.error("Error fetching doctors:", err);
-        res.json({ message: "Failed to fetch doctors" }, { status: 500 });
+        res.status(500).json({ message: "Failed to fetch doctors" });
     }
 });
 exports.fetchDoctors = fetchDoctors;

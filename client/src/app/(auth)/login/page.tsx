@@ -54,7 +54,6 @@ export default function LoginPage() {
         return
       }
 
-
       localStorage.setItem("token", data.token)
       localStorage.setItem(
         "user",
@@ -79,9 +78,11 @@ export default function LoginPage() {
       toast.success(`Welcome back, ${data.user.name}!`)
 
       if (data.user.role === "PATIENT") {
-        setTimeout(() => router.push("/dashboard"), 1000)
-      } else {
+       router.push('/dashboard')
+      } else if (data.user.role === "DOCTOR") {
         router.push("/doctor/dashboard")
+      } else if (data.user.role === "ADMIN"){
+        router.push('/admin/dashboard')
       }
     } catch (err) {
       console.error(err)

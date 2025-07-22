@@ -10,6 +10,13 @@ interface AuthenticatedRequest extends Request {
 
 const prisma = new PrismaClient();
 
+function formatTo12Hour(time: string): string {
+  const [hour, minute] = time.split(":").map(Number);
+  const period = hour >= 12 ? "PM" : "AM";
+  const formattedHour = ((hour + 11) % 12) + 1; 
+  return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
+}
+
 export const createAppointment = async (req: Request, res: Response) => {
   try {
     const { doctorId, date } = req.body;
@@ -21,13 +28,51 @@ export const createAppointment = async (req: Request, res: Response) => {
         .json({ message: "Doctor ID and Date are required" });
     }
 
+    const appointmentDate = new Date(date);
+    const dayOfWeek = appointmentDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+    const hours = appointmentDate.getHours();
+    const minutes = appointmentDate.getMinutes();
+
+    const availability = await prisma.schedule.findFirst({
+      where: {
+        doctorId,
+        day: dayOfWeek,
+      },
+    });
+
+    if (!availability) {
+      return res
+        .status(400)
+        .json({ message: "Doctor is not available on this day." });
+    }
+
+    const [startHour, startMinute] = availability.startTime
+      .split(":")
+      .map(Number);
+    const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+
+    const requestedTime = hours * 60 + minutes;
+    const availableStart = startHour * 60 + startMinute;
+    const availableEnd = endHour * 60 + endMinute;
+
+    if (requestedTime < availableStart || requestedTime >= availableEnd) {
+      return res.status(400).json({
+        message: `Appointment must be between ${formatTo12Hour(
+          availability.startTime
+        )} and ${formatTo12Hour(availability.endTime)}.`,
+      });
+    }
+
     const appointment = await prisma.appointment.create({
       data: {
         patientId,
         doctorId,
-        date: new Date(date),
+        date: appointmentDate,
       },
     });
+
     res.status(201).json(appointment);
   } catch (err) {
     console.error("Create Appointment Error:", err);
@@ -35,13 +80,16 @@ export const createAppointment = async (req: Request, res: Response) => {
   }
 };
 
+
 export const bookAppointment = async (req: Request, res: Response) => {
   try {
     const { doctorId, datetime } = req.body;
     const patientId = (req as any).user?.id;
 
     if (!doctorId || !datetime) {
-      return res.status(400).json({ message: "Doctor ID and datetime are required." });
+      return res
+        .status(400)
+        .json({ message: "Doctor ID and datetime are required." });
     }
 
     const combinedDateTime = new Date(datetime);
@@ -53,12 +101,46 @@ export const bookAppointment = async (req: Request, res: Response) => {
     const hours = combinedDateTime.getHours();
     const minutes = combinedDateTime.getMinutes();
     if (hours < 9 || (hours >= 17 && minutes > 0)) {
-      return res.status(400).json({ message: "Appointments allowed only between 09:00 A.M and 5:00 P.M" });
+      return res.status(400).json({
+        message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
+      });
     }
 
     const doctor = await prisma.user.findUnique({ where: { id: doctorId } });
     if (!doctor || doctor.role !== "DOCTOR") {
-      return res.status(404).json({ message: "Doctor not found or invalid role." });
+      return res
+        .status(404)
+        .json({ message: "Doctor not found or invalid role." });
+    }
+
+    const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    const availability = await prisma.schedule.findFirst({
+      where: { doctorId, day: dayOfWeek },
+    });
+
+    if (!availability) {
+      return res
+        .status(400)
+        .json({ message: "Doctor is not available on this day." });
+    }
+
+    const [startHour, startMinute] = availability.startTime
+      .split(":")
+      .map(Number);
+    const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+    const requestedTime = hours * 60 + minutes;
+    const availableStart = startHour * 60 + startMinute;
+    const availableEnd = endHour * 60 + endMinute;
+
+    if (requestedTime < availableStart || requestedTime >= availableEnd) {
+      return res
+        .status(400)
+        .json({
+          message: `Doctor is only available between ${availability.startTime} and ${availability.endTime}.`,
+        });
     }
 
     const appointment = await prisma.appointment.create({
@@ -79,7 +161,10 @@ export const bookAppointment = async (req: Request, res: Response) => {
   }
 };
 
-export const getMyAppointments = async ( req: AuthenticatedRequest,  res: Response) => {
+export const getMyAppointments = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   try {
     const patientId = req.user?.id;
 
@@ -236,7 +321,7 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
 
     const [hours, minutes] = newTime.split(":").map(Number);
     const combinedDate = new Date(newDate);
-    combinedDate.setHours(hours, minutes, 0, 0); // Set time to the date
+    combinedDate.setHours(hours, minutes, 0, 0);
 
     if (isNaN(combinedDate.getTime())) {
       return res.status(400).json({ message: "Invalid date or time format." });
@@ -245,6 +330,34 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
     if (hours < 9 || (hours >= 17 && minutes > 0)) {
       return res.status(400).json({
         message: "Appointments allowed only between 09:00 A.M and 5.00 P.M",
+      });
+    }
+
+    const dayOfWeek = combinedDate.toLocaleDateString("en-US", {
+      weekday: "long",
+    });
+
+    const availability = await prisma.schedule.findFirst({
+      where: { doctorId: appointment.doctorId, day: dayOfWeek },
+    });
+
+    if (!availability) {
+      return res
+        .status(400)
+        .json({ message: "Doctor is not available on this day." });
+    }
+
+    const [startHour, startMinute] = availability.startTime
+      .split(":")
+      .map(Number);
+    const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+    const requestedTime = hours * 60 + minutes;
+    const availableStart = startHour * 60 + startMinute;
+    const availableEnd = endHour * 60 + endMinute;
+
+    if (requestedTime < availableStart || requestedTime >= availableEnd) {
+      return res.status(400).json({
+        message: `Doctor is only available between  ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
       });
     }
 
@@ -289,27 +402,33 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
     }
 
     if (["cancelled", "completed"].includes(appointment.status)) {
-      return res.status(400).json({ message: `Cannot update a ${appointment.status} appointment` });
+      return res
+        .status(400)
+        .json({ message: `Cannot update a ${appointment.status} appointment` });
     }
 
     const updateData: any = { status };
 
     if (status === "upcoming") {
       if (typeof newDate !== "string" || typeof newTime !== "string") {
-        return res.status(400).json({ message: "Reschedule requires new date and time" });
+        return res
+          .status(400)
+          .json({ message: "Reschedule requires new date and time" });
       }
 
       const combinedDateTime = new Date(`${newDate}T${newTime}`);
       if (isNaN(combinedDateTime.getTime())) {
-        return res.status(400).json({ message: "Invalid date or time format." });
+        return res
+          .status(400)
+          .json({ message: "Invalid date or time format." });
       }
 
       const hours = combinedDateTime.getHours();
       const minutes = combinedDateTime.getMinutes();
       if (hours < 9 || (hours >= 17 && minutes > 0)) {
-        return res
-          .status(400)
-          .json({ message: "Appointments allowed only between 09:00 A.M and 5:00 P.M" });
+        return res.status(400).json({
+          message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
+        });
       }
 
       updateData.date = combinedDateTime;
@@ -320,11 +439,11 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
       data: updateData,
     });
 
-    res.status(200).json({ message: "Appointment updated", appointment: updated });
+    res
+      .status(200)
+      .json({ message: "Appointment updated", appointment: updated });
   } catch (err) {
     console.error("Update appointment status error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
-

@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import ChangePassword from "../../../app/(patient)/components/ChangePassword";
 import Image from "next/image";
 import { API_BASE_URL } from "@/constants/constants";
+import CustomLoader from "@/components/Loader/CustomLoader";
 
 interface Specality {
   id: number;
@@ -145,17 +146,12 @@ export default function ProfilePage() {
     }
   };
 
-  if (loading) {
+ if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg">
-          <FaSpinner className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 animate-spin mx-auto" />
-          <p className="text-gray-600 mt-3 sm:mt-4 text-center text-sm sm:text-base">
-            Loading profile...
-          </p>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <CustomLoader />
       </div>
-    );
+    )
   }
 
   return (

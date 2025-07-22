@@ -168,14 +168,23 @@ export const fetchDoctors = async (req: Request, res: Response) => {
         role: true,
         speciality: true,
         image: true,
+        schedules: {
+          select: {
+            day: true,
+            startTime: true,
+            endTime: true,
+          },
+        },
       },
     });
+
     res.status(200).json({ doctors });
   } catch (err) {
     console.error("Error fetching doctors:", err);
-    res.json({ message: "Failed to fetch doctors" }, { status: 500 });
+    res.status(500).json({ message: "Failed to fetch doctors" });
   }
 };
+
 
 export const getUserById = async (req: Request, res: Response) => {
   try {

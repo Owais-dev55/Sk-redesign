@@ -68,6 +68,14 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials." });
     }
+    const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",") || [];
+    if (ADMIN_EMAILS.includes(user.email) && user.role !== "ADMIN") {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { role: "ADMIN" },
+      });
+      user.role = "ADMIN";
+    }
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET as string,

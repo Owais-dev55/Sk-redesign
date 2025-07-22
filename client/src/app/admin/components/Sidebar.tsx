@@ -2,9 +2,8 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { FaCalendarAlt, FaUser, FaHome, FaBars, FaTimes } from "react-icons/fa"
+import {  FaUser, FaHome, FaBars, FaTimes, FaUserMd, FaUsers } from "react-icons/fa"
 import { useState } from "react"
-import { AiFillSchedule } from "react-icons/ai"
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -18,7 +17,7 @@ export default function Sidebar() {
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
   }
-
+  
   return (
     <>
       <button
@@ -32,37 +31,27 @@ export default function Sidebar() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={toggleMobileMenu} />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 h-auto w-56 bg-white shadow-lg p-3 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 h-screen w-56 bg-white shadow-lg p-3 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:translate-x-0 md:w-64 md:p-4 md:shadow-lg lg:w-72`}
       >
         <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600 mb-4 sm:mb-6 mt-14 md:mt-0">
-          Dr. Dashboard
+          Admin Panel
         </h2>
         <nav className="flex flex-col gap-1 sm:gap-2">
-          <Link href="/doctor/dashboard" className={linkClasses("/doctor/dashboard")} onClick={() => setIsMobileMenuOpen(false)}>
+          <Link href="/admin/dashboard" className={linkClasses("/admin/dashboard")} onClick={() => setIsMobileMenuOpen(false)}>
             <FaHome className="w-4 h-4 sm:w-5 sm:h-5" /> Dashboard
           </Link>
-          <Link
-            href="/doctor/appointment"
-            className={linkClasses("/doctor/appointment")}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <FaCalendarAlt className="w-4 h-4 sm:w-5 sm:h-5" /> My Appointments
+
+          <Link href="/admin/doctors" className={linkClasses("/admin/doctors")} onClick={() => setIsMobileMenuOpen(false)}>
+            <FaUserMd className="w-4 h-4 sm:w-5 sm:h-5" /> Doctors
           </Link>
-          <Link
-            href="/doctor/profile"
-            className={linkClasses("/doctor/profile")}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
+
+          <Link href="/admin/patients" className={linkClasses("/admin/patients")} onClick={() => setIsMobileMenuOpen(false)}>
+            <FaUsers className="w-4 h-4 sm:w-5 sm:h-5" /> Patients
+          </Link>
+           <Link href="/admin/profile" className={linkClasses("/admin/profile")} onClick={() => setIsMobileMenuOpen(false)}>
             <FaUser className="w-4 h-4 sm:w-5 sm:h-5" /> Profile
-          </Link>
-           <Link
-            href="/doctor/availability"
-            className={linkClasses("/doctor/availability")}
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <AiFillSchedule className="w-4 h-4 sm:w-5 sm:h-5" /> Availability
           </Link>
         </nav>
       </aside>

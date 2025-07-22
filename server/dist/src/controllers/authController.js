@@ -55,6 +55,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.registerUser = registerUser;
 const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
         const { email, password } = req.body;
         if (!email || !password) {
@@ -69,6 +70,14 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const isMatch = yield bcrypt_1.default.compare(password, user.password);
         if (!isMatch) {
             return res.status(401).json({ message: "Invalid credentials." });
+        }
+        const ADMIN_EMAILS = ((_a = process.env.ADMIN_EMAILS) === null || _a === void 0 ? void 0 : _a.split(",")) || [];
+        if (ADMIN_EMAILS.includes(user.email) && user.role !== "ADMIN") {
+            yield prisma.user.update({
+                where: { id: user.id },
+                data: { role: "ADMIN" },
+            });
+            user.role = "ADMIN";
         }
         const token = jsonwebtoken_1.default.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
         res.status(200).json({

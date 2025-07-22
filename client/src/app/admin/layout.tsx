@@ -1,22 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
+// import Sidebar from './components/Sidebar';
 import { useRouter } from "next/navigation";
-import Sidebar from "../components/Sidebar";
 import CustomLoader from "@/components/Loader/CustomLoader";
-interface User {
+import Sidebar from "./components/Sidebar";
+
+interface ADMIN {
   name: string;
   email: string;
   role: string;
 }
 
-export default function PatientLayout({
+export default function AdminDashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<ADMIN | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,15 +28,12 @@ export default function PatientLayout({
       router.replace("/login");
       return;
     }
-
     try {
-      const parsedUser: User = JSON.parse(storedUser);
-
-      if (parsedUser.role !== "PATIENT") {
+      const parsedUser: ADMIN = JSON.parse(storedUser);
+      if (parsedUser.role !== "ADMIN") {
         router.replace("/");
         return;
       }
-
       setUser(parsedUser);
     } catch (err) {
       console.error("Invalid user format:", err);
@@ -49,15 +48,12 @@ export default function PatientLayout({
       <div className="flex justify-center items-center h-screen">
         <CustomLoader />
       </div>
-    )
+    );
   }
   return (
-    <div className="flex">
-      <Sidebar /> 
-      <div className="flex-1">
-        
-        {children}
-      </div>
+    <div className="min-h-screen flex bg-gray-100">
+      <Sidebar />
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

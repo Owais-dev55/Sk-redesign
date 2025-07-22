@@ -1,9 +1,9 @@
 "use client"
 import { useEffect, useState } from "react"
-import { FaSpinner } from "react-icons/fa"
 import AppointmentList from  "../components/AppointmentList" 
 import AppointmentStats from "../components/AppointmentStats"
 import { API_BASE_URL } from "@/constants/constants"
+import CustomLoader from "@/components/Loader/CustomLoader"
 
 interface Appointment {
   id: string
@@ -60,15 +60,8 @@ export default function AppointmentsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <FaSpinner className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 animate-spin mx-auto mb-3 sm:mb-4" />
-              <p className="text-gray-600 text-sm sm:text-base">Loading your appointments...</p>
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <CustomLoader />
       </div>
     )
   }

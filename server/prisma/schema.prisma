@@ -22,6 +22,8 @@ model User {
 
   SentMessages     Message[] @relation("SentMessages")
   ReceivedMessages Message[] @relation("ReceivedMessages")
+
+  schedules Schedule[]
 }
 
 model Appointment {
@@ -46,6 +48,16 @@ model Message {
 
   sender   User @relation("SentMessages", fields: [senderId], references: [id])
   receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
+
+model Schedule {
+  id        String   @id @default(uuid())
+  doctor    User     @relation(fields: [doctorId], references: [id])
+  doctorId  String
+  day       String
+  startTime String
+  endTime   String
+  createdAt DateTime @default(now())
 }
 
 enum Role {

@@ -12,6 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateAppointmentStatus = exports.rescheduleAppointment = exports.cancelAppointment = exports.getAppointmentsByPatientId = exports.getDrAppointments = exports.getMyAppointments = exports.bookAppointment = exports.createAppointment = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
+function formatTo12Hour(time) {
+    const [hour, minute] = time.split(":").map(Number);
+    const period = hour >= 12 ? "PM" : "AM";
+    const formattedHour = ((hour + 11) % 12) + 1;
+    return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
+}
 const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -22,11 +28,40 @@ const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 .status(400)
                 .json({ message: "Doctor ID and Date are required" });
         }
+        const appointmentDate = new Date(date);
+        const dayOfWeek = appointmentDate.toLocaleDateString("en-US", {
+            weekday: "long",
+        });
+        const hours = appointmentDate.getHours();
+        const minutes = appointmentDate.getMinutes();
+        const availability = yield prisma.schedule.findFirst({
+            where: {
+                doctorId,
+                day: dayOfWeek,
+            },
+        });
+        if (!availability) {
+            return res
+                .status(400)
+                .json({ message: "Doctor is not available on this day." });
+        }
+        const [startHour, startMinute] = availability.startTime
+            .split(":")
+            .map(Number);
+        const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+        const requestedTime = hours * 60 + minutes;
+        const availableStart = startHour * 60 + startMinute;
+        const availableEnd = endHour * 60 + endMinute;
+        if (requestedTime < availableStart || requestedTime >= availableEnd) {
+            return res.status(400).json({
+                message: `Appointment must be between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
+            });
+        }
         const appointment = yield prisma.appointment.create({
             data: {
                 patientId,
                 doctorId,
-                date: new Date(date),
+                date: appointmentDate,
             },
         });
         res.status(201).json(appointment);
@@ -43,7 +78,9 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const { doctorId, datetime } = req.body;
         const patientId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         if (!doctorId || !datetime) {
-            return res.status(400).json({ message: "Doctor ID and datetime are required." });
+            return res
+                .status(400)
+                .json({ message: "Doctor ID and datetime are required." });
         }
         const combinedDateTime = new Date(datetime);
         if (isNaN(combinedDateTime.getTime())) {
@@ -52,11 +89,40 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
         const hours = combinedDateTime.getHours();
         const minutes = combinedDateTime.getMinutes();
         if (hours < 9 || (hours >= 17 && minutes > 0)) {
-            return res.status(400).json({ message: "Appointments allowed only between 09:00 A.M and 5:00 P.M" });
+            return res.status(400).json({
+                message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
+            });
         }
         const doctor = yield prisma.user.findUnique({ where: { id: doctorId } });
         if (!doctor || doctor.role !== "DOCTOR") {
-            return res.status(404).json({ message: "Doctor not found or invalid role." });
+            return res
+                .status(404)
+                .json({ message: "Doctor not found or invalid role." });
+        }
+        const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
+            weekday: "long",
+        });
+        const availability = yield prisma.schedule.findFirst({
+            where: { doctorId, day: dayOfWeek },
+        });
+        if (!availability) {
+            return res
+                .status(400)
+                .json({ message: "Doctor is not available on this day." });
+        }
+        const [startHour, startMinute] = availability.startTime
+            .split(":")
+            .map(Number);
+        const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+        const requestedTime = hours * 60 + minutes;
+        const availableStart = startHour * 60 + startMinute;
+        const availableEnd = endHour * 60 + endMinute;
+        if (requestedTime < availableStart || requestedTime >= availableEnd) {
+            return res
+                .status(400)
+                .json({
+                message: `Doctor is only available between ${availability.startTime} and ${availability.endTime}.`,
+            });
         }
         const appointment = yield prisma.appointment.create({
             data: {
@@ -213,13 +279,36 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
         }
         const [hours, minutes] = newTime.split(":").map(Number);
         const combinedDate = new Date(newDate);
-        combinedDate.setHours(hours, minutes, 0, 0); // Set time to the date
+        combinedDate.setHours(hours, minutes, 0, 0);
         if (isNaN(combinedDate.getTime())) {
             return res.status(400).json({ message: "Invalid date or time format." });
         }
         if (hours < 9 || (hours >= 17 && minutes > 0)) {
             return res.status(400).json({
                 message: "Appointments allowed only between 09:00 A.M and 5.00 P.M",
+            });
+        }
+        const dayOfWeek = combinedDate.toLocaleDateString("en-US", {
+            weekday: "long",
+        });
+        const availability = yield prisma.schedule.findFirst({
+            where: { doctorId: appointment.doctorId, day: dayOfWeek },
+        });
+        if (!availability) {
+            return res
+                .status(400)
+                .json({ message: "Doctor is not available on this day." });
+        }
+        const [startHour, startMinute] = availability.startTime
+            .split(":")
+            .map(Number);
+        const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+        const requestedTime = hours * 60 + minutes;
+        const availableStart = startHour * 60 + startMinute;
+        const availableEnd = endHour * 60 + endMinute;
+        if (requestedTime < availableStart || requestedTime >= availableEnd) {
+            return res.status(400).json({
+                message: `Doctor is only available between  ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
             });
         }
         const updated = yield prisma.appointment.update({
@@ -259,23 +348,29 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
             return res.status(403).json({ message: "Unauthorized action" });
         }
         if (["cancelled", "completed"].includes(appointment.status)) {
-            return res.status(400).json({ message: `Cannot update a ${appointment.status} appointment` });
+            return res
+                .status(400)
+                .json({ message: `Cannot update a ${appointment.status} appointment` });
         }
         const updateData = { status };
         if (status === "upcoming") {
             if (typeof newDate !== "string" || typeof newTime !== "string") {
-                return res.status(400).json({ message: "Reschedule requires new date and time" });
+                return res
+                    .status(400)
+                    .json({ message: "Reschedule requires new date and time" });
             }
             const combinedDateTime = new Date(`${newDate}T${newTime}`);
             if (isNaN(combinedDateTime.getTime())) {
-                return res.status(400).json({ message: "Invalid date or time format." });
+                return res
+                    .status(400)
+                    .json({ message: "Invalid date or time format." });
             }
             const hours = combinedDateTime.getHours();
             const minutes = combinedDateTime.getMinutes();
             if (hours < 9 || (hours >= 17 && minutes > 0)) {
-                return res
-                    .status(400)
-                    .json({ message: "Appointments allowed only between 09:00 A.M and 5:00 P.M" });
+                return res.status(400).json({
+                    message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
+                });
             }
             updateData.date = combinedDateTime;
         }
@@ -283,7 +378,9 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
             where: { id: appointmentId },
             data: updateData,
         });
-        res.status(200).json({ message: "Appointment updated", appointment: updated });
+        res
+            .status(200)
+            .json({ message: "Appointment updated", appointment: updated });
     }
     catch (err) {
         console.error("Update appointment status error:", err);

@@ -1,16 +1,23 @@
 "use client";
 
 import type React from "react";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "@/constants/constants";
+import { API_BASE_URL , formatTo12Hour } from "@/constants/constants";
+ 
+interface Schedule {
+  day: string;
+  startTime: string;
+  endTime: string;
+}
 
 interface Doctor {
   id: string;
   name: string;
   speciality: string;
+  image: string;
+  schedules?: Schedule[];
 }
 
 export default function BookAppointmentPage() {
@@ -20,6 +27,8 @@ export default function BookAppointmentPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
+
+  
 
   useEffect(() => {
     const fetchDoctors = async () => {
@@ -38,6 +47,8 @@ export default function BookAppointmentPage() {
     fetchDoctors();
   }, []);
 
+  const selectedDoctorObj = doctors.find((doc) => doc.id === selectedDoctor);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedDoctor || !date || !time) {
@@ -54,13 +65,18 @@ export default function BookAppointmentPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ doctorId: selectedDoctor, datetime: `${date}T${time}:00`,}),
+        body: JSON.stringify({
+          doctorId: selectedDoctor,
+          datetime: `${date}T${time}:00`,
+        }),
       });
+
       const data = await res.json();
       if (!res.ok) {
         toast.error(data.message || "Booking failed.");
         return;
       }
+
       toast.success("Appointment booked successfully!");
       router.push("/dashboard/appointments");
     } catch (err) {
@@ -95,7 +111,8 @@ export default function BookAppointmentPage() {
                 <option value="">Choose a doctor</option>
                 {doctors.map((doctor) => (
                   <option key={doctor.id} value={doctor.id}>
-                    {doctor.name.toLowerCase().startsWith("dr.")
+                    {doctor.name.toLowerCase().startsWith("dr.") ||
+                    doctor.name.toLowerCase().startsWith("dr")
                       ? doctor.name
                       : `Dr. ${doctor.name}`}{" "}
                     ({doctor.speciality})
@@ -103,6 +120,24 @@ export default function BookAppointmentPage() {
                 ))}
               </select>
             </div>
+
+            {selectedDoctorObj?.schedules &&
+              selectedDoctorObj.schedules.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-1">
+                    Availability:
+                  </h4>
+                  <ul className="text-sm text-gray-600 list-disc list-inside">
+                    {selectedDoctorObj.schedules.map((slot, index) => (
+                      <li key={index}>
+                        {slot.day}: {formatTo12Hour(slot.startTime)} -{" "}
+                        {formatTo12Hour(slot.endTime)}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Date

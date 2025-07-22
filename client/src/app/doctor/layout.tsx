@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import { useRouter } from 'next/navigation';
+import CustomLoader from '@/components/Loader/CustomLoader';
 
 interface Doctor {
   name: string;
@@ -44,13 +45,13 @@ export default function DoctorDashboardLayout({
       }
     }, [router]);
   
-    if (loading || !user) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-blue-50 text-gray-600">
-          Loading dashboard...
-        </div>
-      );
-    }
+   if (loading || !user) {
+       return (
+         <div className="flex justify-center items-center h-screen">
+           <CustomLoader />
+         </div>
+       )
+     }
   return (
     <div className="min-h-screen flex bg-gray-100">
 <Sidebar />

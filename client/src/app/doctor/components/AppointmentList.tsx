@@ -20,7 +20,7 @@ interface Appointment {
   type?: string;
   notes?: string;
   patient: {
-    id:string
+    id: string;
     name: string;
     email: string;
   };
@@ -65,7 +65,7 @@ export default function AppointmentList({
 
   const handleChatClick = (patientId: string) => {
     router.push(`/doctor/chat/${patientId}`);
-    console.log(patientId)
+    console.log(patientId);
   };
   const [selectedAppointmentId, setSelectedAppointmentId] = useState<
     string | null
@@ -224,19 +224,16 @@ export default function AppointmentList({
                             >
                               Cancel
                             </button>
-                            <span className="text-gray-300">|</span>
-                            <button
-                              className="text-xs sm:text-sm text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
-                              onClick={() =>
-                                handleChatClick(appointment.patient.id)
-                              }
-                            >
-                              Chat
-                            </button>
                           </>
                         )}
                       </div>
                     )}
+                  <button
+                    className="text-xs sm:text-sm text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
+                    onClick={() => handleChatClick(appointment.patient.id)}
+                  >
+                    Chat
+                  </button>
                 </div>
               </div>
             );
