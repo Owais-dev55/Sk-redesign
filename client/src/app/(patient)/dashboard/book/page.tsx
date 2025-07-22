@@ -49,81 +49,42 @@ export default function BookAppointmentPage() {
 
   const selectedDoctorObj = doctors.find((doc) => doc.id === selectedDoctor);
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!selectedDoctor || !date || !time) {
-  //     toast.error("Please fill all the fields.");
-  //     return;
-  //   }
-
-  //   setLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //       body: JSON.stringify({
-  //         doctorId: selectedDoctor,
-  //         datetime: `${date}T${time}:00`,
-  //       }),
-  //     });
-
-  //     const data = await res.json();
-  //     if (!res.ok) {
-  //       toast.error(data.message || "Booking failed.");
-  //       return;
-  //     }
-
-  //     toast.success("Appointment booked successfully!");
-  //     router.push("/dashboard/appointments");
-  //   } catch (err) {
-  //     toast.error("Something went wrong!" + err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  if (!selectedDoctor || !date || !time) {
-    toast.error("Please fill all the fields.");
-    return;
-  }
-
-  setLoading(true);
-  try {
-    const token = localStorage.getItem("token");
-    const localDateTime = new Date(`${date}T${time}`);
-    const isoString = localDateTime.toISOString(); // converted to UTC correctly
-
-    const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        doctorId: selectedDoctor,
-        datetime: isoString,
-      }),
-    });
-
-    const data = await res.json();
-    if (!res.ok) {
-      toast.error(data.message || "Booking failed.");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedDoctor || !date || !time) {
+      toast.error("Please fill all the fields.");
       return;
     }
 
-    toast.success("Appointment booked successfully!");
-    router.push("/dashboard/appointments");
-  } catch (err) {
-    toast.error("Something went wrong!" + err);
-  } finally {
-    setLoading(false);
-  }
-};
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          doctorId: selectedDoctor,
+          datetime: `${date}T${time}:00`,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data.message || "Booking failed.");
+        return;
+      }
+
+      toast.success("Appointment booked successfully!");
+      router.push("/dashboard/appointments");
+    } catch (err) {
+      toast.error("Something went wrong!" + err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
