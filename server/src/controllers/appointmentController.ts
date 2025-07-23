@@ -91,19 +91,12 @@ export const bookAppointment = async (req: Request, res: Response) => {
         .json({ message: "Doctor ID and datetime are required." });
     }
 
-    // Parse input ISO string as Asia/Karachi time, then convert to JS Date (UTC)
     const dtLocal = DateTime.fromISO(datetime, { zone: "Asia/Karachi" });
     if (!dtLocal.isValid) {
       return res.status(400).json({ message: "Invalid datetime format." });
     }
     const combinedDateTime = dtLocal.toJSDate();
 
-    // Logging for debugging
-    console.log("▶️ [API] raw datetime payload:", datetime);
-    console.log("▶️ [API] interpreted as Asia/Karachi ISO:", dtLocal.toISO());
-    console.log("▶️ [API] JS Date toISOString (UTC):", combinedDateTime.toISOString());
-
-    // Validate within working hours (convert UTC back to PKT for range check)
     const pktHour = dtLocal.hour;
     const pktMinute = dtLocal.minute;
     if (pktHour < 9 || (pktHour >= 17 && pktMinute > 0)) {
@@ -140,7 +133,7 @@ export const bookAppointment = async (req: Request, res: Response) => {
       return res
         .status(400)
         .json({
-          message: `Doctor is only available between ${availability.startTime} and ${availability.endTime}.`,
+          message: `Doctor is only available between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
         });
     }
 
@@ -161,7 +154,6 @@ export const bookAppointment = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal server error." });
   }
 };
-
 
 export const getMyAppointments = async (
   req: AuthenticatedRequest,
@@ -321,7 +313,6 @@ export const rescheduleAppointment = async (req: Request, res: Response) => {
         .json({ message: "New date and time are required" });
     }
 
-    // ✅ Luxon to handle timezone safely
     const combinedDateTime = DateTime.fromISO(`${newDate}T${newTime}`, {
       zone: "Asia/Karachi",
     });
@@ -427,24 +418,28 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
           .json({ message: "Reschedule requires new date and time" });
       }
 
-      const combinedDateTime = new Date(`${newDate}T${newTime}`);
-      if (isNaN(combinedDateTime.getTime())) {
+      const rawDateTime = `${newDate}T${newTime}`;
+      const localDateTime = DateTime.fromISO(rawDateTime, {
+        zone: "Asia/Karachi",
+      });
+
+      if (!localDateTime.isValid) {
         return res
           .status(400)
           .json({ message: "Invalid date or time format." });
       }
 
-      const hours = combinedDateTime.getHours();
-      const minutes = combinedDateTime.getMinutes();
+      const utcDate = localDateTime.toUTC().toJSDate();
+      const hours = localDateTime.hour;
+      const minutes = localDateTime.minute;
 
       if (hours < 9 || (hours >= 17 && minutes > 0)) {
         return res.status(400).json({
           message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
         });
       }
-      const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
-        weekday: "long",
-      });
+
+      const dayOfWeek = localDateTime.setZone("Asia/Karachi").toFormat("cccc"); 
 
       const availability = await prisma.schedule.findFirst({
         where: { doctorId: drId, day: dayOfWeek },
@@ -472,17 +467,22 @@ export const updateAppointmentStatus = async (req: Request, res: Response) => {
           )} and ${formatTo12Hour(availability.endTime)}.`,
         });
       }
-      updateData.date = combinedDateTime;
+
+      updateData.date = utcDate;
     }
+
     const updated = await prisma.appointment.update({
       where: { id: appointmentId },
       data: updateData,
     });
+
     return res
       .status(200)
       .json({ message: "Appointment updated", appointment: updated });
+
   } catch (err) {
     console.error("Update appointment status error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
+

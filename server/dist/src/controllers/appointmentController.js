@@ -82,17 +82,11 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 .status(400)
                 .json({ message: "Doctor ID and datetime are required." });
         }
-        // Parse input ISO string as Asia/Karachi time, then convert to JS Date (UTC)
         const dtLocal = luxon_1.DateTime.fromISO(datetime, { zone: "Asia/Karachi" });
         if (!dtLocal.isValid) {
             return res.status(400).json({ message: "Invalid datetime format." });
         }
         const combinedDateTime = dtLocal.toJSDate();
-        // Logging for debugging
-        console.log("▶️ [API] raw datetime payload:", datetime);
-        console.log("▶️ [API] interpreted as Asia/Karachi ISO:", dtLocal.toISO());
-        console.log("▶️ [API] JS Date toISOString (UTC):", combinedDateTime.toISOString());
-        // Validate within working hours (convert UTC back to PKT for range check)
         const pktHour = dtLocal.hour;
         const pktMinute = dtLocal.minute;
         if (pktHour < 9 || (pktHour >= 17 && pktMinute > 0)) {
@@ -124,7 +118,7 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
             return res
                 .status(400)
                 .json({
-                message: `Doctor is only available between ${availability.startTime} and ${availability.endTime}.`,
+                message: `Doctor is only available between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
             });
         }
         const appointment = yield prisma.appointment.create({
@@ -280,7 +274,6 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 .status(400)
                 .json({ message: "New date and time are required" });
         }
-        // ✅ Luxon to handle timezone safely
         const combinedDateTime = luxon_1.DateTime.fromISO(`${newDate}T${newTime}`, {
             zone: "Asia/Karachi",
         });
@@ -367,22 +360,24 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
                     .status(400)
                     .json({ message: "Reschedule requires new date and time" });
             }
-            const combinedDateTime = new Date(`${newDate}T${newTime}`);
-            if (isNaN(combinedDateTime.getTime())) {
+            const rawDateTime = `${newDate}T${newTime}`;
+            const localDateTime = luxon_1.DateTime.fromISO(rawDateTime, {
+                zone: "Asia/Karachi",
+            });
+            if (!localDateTime.isValid) {
                 return res
                     .status(400)
                     .json({ message: "Invalid date or time format." });
             }
-            const hours = combinedDateTime.getHours();
-            const minutes = combinedDateTime.getMinutes();
+            const utcDate = localDateTime.toUTC().toJSDate();
+            const hours = localDateTime.hour;
+            const minutes = localDateTime.minute;
             if (hours < 9 || (hours >= 17 && minutes > 0)) {
                 return res.status(400).json({
                     message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
                 });
             }
-            const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
-                weekday: "long",
-            });
+            const dayOfWeek = localDateTime.setZone("Asia/Karachi").toFormat("cccc");
             const availability = yield prisma.schedule.findFirst({
                 where: { doctorId: drId, day: dayOfWeek },
             });
@@ -403,7 +398,7 @@ const updateAppointmentStatus = (req, res) => __awaiter(void 0, void 0, void 0, 
                     message: `Doctor is only available between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
                 });
             }
-            updateData.date = combinedDateTime;
+            updateData.date = utcDate;
         }
         const updated = yield prisma.appointment.update({
             where: { id: appointmentId },

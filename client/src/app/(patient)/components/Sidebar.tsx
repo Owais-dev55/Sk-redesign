@@ -31,7 +31,7 @@ export default function Sidebar() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden" onClick={toggleMobileMenu} />
       )}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 h-screen w-56 bg-white shadow-lg p-3 transform transition-transform duration-300 ease-in-out ${
+        className={`fixed inset-y-0 left-0 z-40 h-auto w-56 bg-white shadow-lg p-3 transform transition-transform duration-300 ease-in-out ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } md:static md:translate-x-0 md:w-64 md:p-4 md:shadow-lg lg:w-72`}
       >

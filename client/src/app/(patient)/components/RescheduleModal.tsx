@@ -111,14 +111,14 @@ export default function RescheduleModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-gray-600 hover:underline text-sm sm:text-base mt-2 sm:mt-0"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg text-gray-600 hover:underline text-sm sm:text-base mt-2 sm:mt-0 cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleReschedule}
             disabled={loading}
-            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center"
+            className="w-full sm:w-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm sm:text-base flex items-center justify-center cursor-pointer"
           >
             {loading ? (
               <>
