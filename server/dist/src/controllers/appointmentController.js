@@ -280,20 +280,23 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
                 .status(400)
                 .json({ message: "New date and time are required" });
         }
-        const [hours, minutes] = newTime.split(":").map(Number);
-        const combinedDate = new Date(newDate);
-        combinedDate.setHours(hours, minutes, 0, 0);
-        if (isNaN(combinedDate.getTime())) {
-            return res.status(400).json({ message: "Invalid date or time format." });
+        // ✅ Luxon to handle timezone safely
+        const combinedDateTime = luxon_1.DateTime.fromISO(`${newDate}T${newTime}`, {
+            zone: "Asia/Karachi",
+        });
+        if (!combinedDateTime.isValid) {
+            return res
+                .status(400)
+                .json({ message: "Invalid date or time format." });
         }
+        const hours = combinedDateTime.hour;
+        const minutes = combinedDateTime.minute;
         if (hours < 9 || (hours >= 17 && minutes > 0)) {
             return res.status(400).json({
                 message: "Appointments allowed only between 09:00 A.M and 5.00 P.M",
             });
         }
-        const dayOfWeek = combinedDate.toLocaleDateString("en-US", {
-            weekday: "long",
-        });
+        const dayOfWeek = combinedDateTime.toFormat("cccc");
         const availability = yield prisma.schedule.findFirst({
             where: { doctorId: appointment.doctorId, day: dayOfWeek },
         });
@@ -305,19 +308,21 @@ const rescheduleAppointment = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const [startHour, startMinute] = availability.startTime
             .split(":")
             .map(Number);
-        const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+        const [endHour, endMinute] = availability.endTime
+            .split(":")
+            .map(Number);
         const requestedTime = hours * 60 + minutes;
         const availableStart = startHour * 60 + startMinute;
         const availableEnd = endHour * 60 + endMinute;
         if (requestedTime < availableStart || requestedTime >= availableEnd) {
             return res.status(400).json({
-                message: `Doctor is only available between  ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
+                message: `Doctor is only available between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
             });
         }
         const updated = yield prisma.appointment.update({
             where: { id: appointmentId },
             data: {
-                date: combinedDate,
+                date: combinedDateTime.toJSDate(),
                 status: "upcoming",
             },
         });
