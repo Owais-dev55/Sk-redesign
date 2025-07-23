@@ -28,9 +28,7 @@ export default function BookAppointmentPage() {
   const [time, setTime] = useState("");
   const [loading, setLoading] = useState(false);
 
-  
-
-  useEffect(() => {
+   useEffect(() => {
     const fetchDoctors = async () => {
       try {
         const res = await fetch(`${API_BASE_URL}/api/doctors`);
@@ -59,6 +57,9 @@ export default function BookAppointmentPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
+      const datetime = `${date}T${time}:00`;
+      // Log payload
+      console.log("▶️ [CLIENT-BOOK] sending datetime:", datetime);
       const res = await fetch(`${API_BASE_URL}/api/appointments/book`, {
         method: "POST",
         headers: {
@@ -67,7 +68,7 @@ export default function BookAppointmentPage() {
         },
         body: JSON.stringify({
           doctorId: selectedDoctor,
-          datetime: `${date}T${time}:00`,
+          datetime,
         }),
       });
 
@@ -86,6 +87,7 @@ export default function BookAppointmentPage() {
     }
   };
 
+  
   return (
     <div className="min-h-screen bg-blue-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
