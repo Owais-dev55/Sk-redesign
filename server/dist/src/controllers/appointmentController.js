@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateAppointmentStatus = exports.rescheduleAppointment = exports.cancelAppointment = exports.getAppointmentsByPatientId = exports.getDrAppointments = exports.getMyAppointments = exports.bookAppointment = exports.createAppointment = void 0;
+exports.updateAppointmentStatus = exports.rescheduleAppointment = exports.cancelAppointment = exports.getAppointmentsByPatientId = exports.getDrAppointments = exports.getMyAppointments = exports.bookAppointment = void 0;
 const client_1 = require("@prisma/client");
+const luxon_1 = require("luxon");
 const prisma = new client_1.PrismaClient();
 function formatTo12Hour(time) {
     const [hour, minute] = time.split(":").map(Number);
@@ -18,60 +19,59 @@ function formatTo12Hour(time) {
     const formattedHour = ((hour + 11) % 12) + 1;
     return `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
 }
-const createAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    try {
-        const { doctorId, date } = req.body;
-        const patientId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-        if (!doctorId || !date) {
-            return res
-                .status(400)
-                .json({ message: "Doctor ID and Date are required" });
-        }
-        const appointmentDate = new Date(date);
-        const dayOfWeek = appointmentDate.toLocaleDateString("en-US", {
-            weekday: "long",
-        });
-        const hours = appointmentDate.getHours();
-        const minutes = appointmentDate.getMinutes();
-        const availability = yield prisma.schedule.findFirst({
-            where: {
-                doctorId,
-                day: dayOfWeek,
-            },
-        });
-        if (!availability) {
-            return res
-                .status(400)
-                .json({ message: "Doctor is not available on this day." });
-        }
-        const [startHour, startMinute] = availability.startTime
-            .split(":")
-            .map(Number);
-        const [endHour, endMinute] = availability.endTime.split(":").map(Number);
-        const requestedTime = hours * 60 + minutes;
-        const availableStart = startHour * 60 + startMinute;
-        const availableEnd = endHour * 60 + endMinute;
-        if (requestedTime < availableStart || requestedTime >= availableEnd) {
-            return res.status(400).json({
-                message: `Appointment must be between ${formatTo12Hour(availability.startTime)} and ${formatTo12Hour(availability.endTime)}.`,
-            });
-        }
-        const appointment = yield prisma.appointment.create({
-            data: {
-                patientId,
-                doctorId,
-                date: appointmentDate,
-            },
-        });
-        res.status(201).json(appointment);
-    }
-    catch (err) {
-        console.error("Create Appointment Error:", err);
-        res.status(500).json({ message: "Internal server error" });
-    }
-});
-exports.createAppointment = createAppointment;
+// export const createAppointment = async (req: Request, res: Response) => {
+//   try {
+//     const { doctorId, date } = req.body;
+//     const patientId = req.user?.id;
+//     if (!doctorId || !date) {
+//       return res
+//         .status(400)
+//         .json({ message: "Doctor ID and Date are required" });
+//     }
+//     const appointmentDate = new Date(date);
+//     const dayOfWeek = appointmentDate.toLocaleDateString("en-US", {
+//       weekday: "long",
+//     });
+//     const hours = appointmentDate.getHours();
+//     const minutes = appointmentDate.getMinutes();
+//     const availability = await prisma.schedule.findFirst({
+//       where: {
+//         doctorId,
+//         day: dayOfWeek,
+//       },
+//     });
+//     if (!availability) {
+//       return res
+//         .status(400)
+//         .json({ message: "Doctor is not available on this day." });
+//     }
+//     const [startHour, startMinute] = availability.startTime
+//       .split(":")
+//       .map(Number);
+//     const [endHour, endMinute] = availability.endTime.split(":").map(Number);
+//     const requestedTime = hours * 60 + minutes;
+//     const availableStart = startHour * 60 + startMinute;
+//     const availableEnd = endHour * 60 + endMinute;
+//     if (requestedTime < availableStart || requestedTime >= availableEnd) {
+//       return res.status(400).json({
+//         message: `Appointment must be between ${formatTo12Hour(
+//           availability.startTime
+//         )} and ${formatTo12Hour(availability.endTime)}.`,
+//       });
+//     }
+//     const appointment = await prisma.appointment.create({
+//       data: {
+//         patientId,
+//         doctorId,
+//         date: appointmentDate,
+//       },
+//     });
+//     res.status(201).json(appointment);
+//   } catch (err) {
+//     console.error("Create Appointment Error:", err);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
 const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -82,13 +82,20 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 .status(400)
                 .json({ message: "Doctor ID and datetime are required." });
         }
-        const combinedDateTime = new Date(datetime);
-        if (isNaN(combinedDateTime.getTime())) {
+        // Parse input ISO string as Asia/Karachi time, then convert to JS Date (UTC)
+        const dtLocal = luxon_1.DateTime.fromISO(datetime, { zone: "Asia/Karachi" });
+        if (!dtLocal.isValid) {
             return res.status(400).json({ message: "Invalid datetime format." });
         }
-        const hours = combinedDateTime.getHours();
-        const minutes = combinedDateTime.getMinutes();
-        if (hours < 9 || (hours >= 17 && minutes > 0)) {
+        const combinedDateTime = dtLocal.toJSDate();
+        // Logging for debugging
+        console.log("▶️ [API] raw datetime payload:", datetime);
+        console.log("▶️ [API] interpreted as Asia/Karachi ISO:", dtLocal.toISO());
+        console.log("▶️ [API] JS Date toISOString (UTC):", combinedDateTime.toISOString());
+        // Validate within working hours (convert UTC back to PKT for range check)
+        const pktHour = dtLocal.hour;
+        const pktMinute = dtLocal.minute;
+        if (pktHour < 9 || (pktHour >= 17 && pktMinute > 0)) {
             return res.status(400).json({
                 message: "Appointments allowed only between 09:00 A.M and 5:00 P.M",
             });
@@ -99,9 +106,7 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 .status(404)
                 .json({ message: "Doctor not found or invalid role." });
         }
-        const dayOfWeek = combinedDateTime.toLocaleDateString("en-US", {
-            weekday: "long",
-        });
+        const dayOfWeek = dtLocal.toFormat('EEEE');
         const availability = yield prisma.schedule.findFirst({
             where: { doctorId, day: dayOfWeek },
         });
@@ -110,14 +115,12 @@ const bookAppointment = (req, res) => __awaiter(void 0, void 0, void 0, function
                 .status(400)
                 .json({ message: "Doctor is not available on this day." });
         }
-        const [startHour, startMinute] = availability.startTime
-            .split(":")
-            .map(Number);
+        const [startHour, startMinute] = availability.startTime.split(":").map(Number);
         const [endHour, endMinute] = availability.endTime.split(":").map(Number);
-        const requestedTime = hours * 60 + minutes;
+        const requestedMinutes = pktHour * 60 + pktMinute;
         const availableStart = startHour * 60 + startMinute;
         const availableEnd = endHour * 60 + endMinute;
-        if (requestedTime < availableStart || requestedTime >= availableEnd) {
+        if (requestedMinutes < availableStart || requestedMinutes >= availableEnd) {
             return res
                 .status(400)
                 .json({

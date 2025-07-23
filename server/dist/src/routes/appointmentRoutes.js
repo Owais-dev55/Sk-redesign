@@ -9,7 +9,7 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const requireRole_1 = require("../middlewares/requireRole");
 const router = express_1.default.Router();
 router.post("/book", authMiddleware_1.authMiddlewWare, (0, requireRole_1.requireRole)("PATIENT"), appointmentController_1.bookAppointment);
-router.post("/", authMiddleware_1.authMiddlewWare, (0, requireRole_1.requireRole)("PATIENT"), appointmentController_1.createAppointment);
+// router.post("/", authMiddlewWare, requireRole("PATIENT"), createAppointment);
 router.get("/mine", authMiddleware_1.authMiddlewWare, (0, requireRole_1.requireRole)("PATIENT"), appointmentController_1.getMyAppointments);
 router.get("/doctor", authMiddleware_1.authMiddlewWare, (0, requireRole_1.requireRole)("DOCTOR"), appointmentController_1.getDrAppointments);
 router.get("/patient/:patientId", authMiddleware_1.authMiddlewWare, (0, requireRole_1.requireRole)("DOCTOR"), appointmentController_1.getAppointmentsByPatientId);
